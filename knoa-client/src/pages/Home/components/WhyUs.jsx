@@ -149,58 +149,60 @@ const WhyUs = () => {
     }
   `;
   return (
-    <section className="container mx-auto  py-12">
-      <div className="flex flex-col items-center text-center mb-10 space-y-3">
-        {/* Short Subheading / Tag */}
-        <span className="text-[#0077b6] font-bold tracking-[0.2em] uppercase text-xs px-3 py-1 bg-[#39B8AD]/10 rounded-full">
-          BEYOND THE CLASSROOM
-        </span>
+    <section className=" max-w-7xl mx-auto px-4 py-8">
+      <div className="container mx-auto  py-12">
+        <div className="flex flex-col items-center text-center mb-10 space-y-3">
+          {/* Short Subheading / Tag */}
+          <span className="text-[#0077b6] font-bold tracking-[0.2em] uppercase text-xs px-3 py-1 bg-[#39B8AD]/10 rounded-full">
+            BEYOND THE CLASSROOM
+          </span>
 
-        {/* Main Section Heading */}
-        <h2 className="text-3xl md:text-4xl font-extrabold text-[#03045e]">
-          Why Choose Our
-          <span className="text-[#00b4d8]">Learning Experience?</span>
-        </h2>
+          {/* Main Section Heading */}
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#03045e]">
+            Why Choose Our
+            <span className="text-[#00b4d8]">Learning Experience?</span>
+          </h2>
 
-        {/* Short Description */}
-        <p className="text-gray-500 text-base md:text-lg max-w-2xl leading-relaxed">
-          We don’t just provide courses; we build career paths. Our platform
-          combines industry-expert instruction with a flexible, high-tech
-          environment designed to help you master the skills that matter in
-          today's market.
-        </p>
+          {/* Short Description */}
+          <p className="text-gray-500 text-base md:text-lg max-w-2xl leading-relaxed">
+            We don’t just provide courses; we build career paths. Our platform
+            combines industry-expert instruction with a flexible, high-tech
+            environment designed to help you master the skills that matter in
+            today's market.
+          </p>
 
-        {/* Decorative underline */}
-        <div className="w-20 h-1.5 bg-[#0077b6] rounded-full mt-2"></div>
-      </div>
+          {/* Decorative underline */}
+          <div className="w-20 h-1.5 bg-[#0077b6] rounded-full mt-2"></div>
+        </div>
 
-      <StyledWrapper>
-        <div className="flex flex-col lg:flex-row items-center gap-12">
-          {/* The Image Part */}
-          <div className="flex-1">
-            <div className="image-container">
-              <img
-                src="https://i.ibb.co.com/dwR90wFR/student-online-young-cute-girl-glasses-orange-sweater-studying-computer-with-headphones.jpg"
-                alt="Learning"
-              />
+        <StyledWrapper>
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            {/* The Image Part */}
+            <div className="flex-1">
+              <div className="image-container">
+                <img
+                  src="https://i.ibb.co.com/dwR90wFR/student-online-young-cute-girl-glasses-orange-sweater-studying-computer-with-headphones.jpg"
+                  alt="Learning"
+                />
+              </div>
+            </div>
+
+            {/* The Cards Part */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {pillars.map((pillar, index) => (
+                <div className="card" key={index}>
+                  <div className="number">
+                    <p className="text"></p>
+                  </div>
+                  <div className="icon">{pillar.icon}</div>
+                  <p className="heading">{pillar.title}</p>
+                  <p className="content">{pillar.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
-
-          {/* The Cards Part */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {pillars.map((pillar, index) => (
-              <div className="card" key={index}>
-                <div className="number">
-                  <p className="text"></p>
-                </div>
-                <div className="icon">{pillar.icon}</div>
-                <p className="heading">{pillar.title}</p>
-                <p className="content">{pillar.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </StyledWrapper>
+        </StyledWrapper>
+      </div>
     </section>
   );
 };

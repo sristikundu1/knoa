@@ -15,7 +15,7 @@ const HomeLayout = () => {
 
       {/* MAIN: Full width background, but CONTENT is max-w-7xl */}
       <main className="flex-grow w-full">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className=" ">
           <Outlet />
         </div>
       </main>
