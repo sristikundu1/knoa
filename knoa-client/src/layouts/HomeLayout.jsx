@@ -8,7 +8,7 @@ const HomeLayout = () => {
     <div className="font-inter flex flex-col min-h-screen">
       {/* HEADER: Full width background */}
       <header className="w-full bg-base-100 shadow-md border-b border-base-200">
-        <div className="max-w-10/12 mx-auto px-4">
+        <div className="max-w-9/12 mx-auto px-4">
           <Navbar />
         </div>
       </header>

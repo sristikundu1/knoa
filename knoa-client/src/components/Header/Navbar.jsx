@@ -8,8 +8,8 @@ const Navbar = () => {
         <NavLink
           to="/"
           className={({ isActive }) =>
-            `text-lg font-bold text-[#03045e] drop-shadow-md transition-all duration-200 
-          ${isActive ? "underline decoration-[#03045e] decoration-2 underline-offset-4" : "hover:text-[#00b4d8]"}`
+            `text-lg font-bold text-[#00b4d8] drop-shadow-md transition-all duration-200 
+          ${isActive ? "underline decoration-[#03045e] decoration-2 underline-offset-4" : "hover:text-[#03045e]"}`
           }
         >
           Home
@@ -19,8 +19,8 @@ const Navbar = () => {
         <NavLink
           to="/courses"
           className={({ isActive }) =>
-            `text-lg font-bold text-[#03045e] drop-shadow-md transition-all duration-200 
-          ${isActive ? "underline decoration-[#03045e]  decoration-2 underline-offset-4" : "hover:text-[#00b4d8]"}`
+            `text-lg font-bold text-[#00b4d8] drop-shadow-md transition-all duration-200 
+          ${isActive ? "underline decoration-[#03045e]  decoration-2 underline-offset-4" : "hover:text-[#03045e]"}`
           }
         >
           Courses
@@ -30,8 +30,8 @@ const Navbar = () => {
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
-            `text-lg font-bold text-[#03045e] drop-shadow-md transition-all duration-200 
-          ${isActive ? "underline decoration-[#03045e]  decoration-2 underline-offset-4" : "hover:text-[#00b4d8]"}`
+            `text-lg font-bold text-[#00b4d8] drop-shadow-md transition-all duration-200 
+          ${isActive ? "underline decoration-[#03045e]  decoration-2 underline-offset-4" : "hover:text-[#03045e]"}`
           }
         >
           Dashboard
@@ -79,7 +79,7 @@ const Navbar = () => {
           <ul className="menu menu-horizontal px-1">{links}</ul>
         </div>
         <div className="navbar-end">
-          <a className="btn bg-[#00b4d8] text-[#03045e] px-10 font-bold text-lg py-6 ">
+          <a className="btn bg-[#00b4d8] text-white  font-bold text-lg py-6 border-none hover:bg-[#03045e] px-8 rounded-lg ">
             Sign Up
           </a>
         </div>
