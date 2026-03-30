@@ -2,11 +2,11 @@ import React from "react";
 import styled from "styled-components";
 import {
   HiOutlineHeart,
-  HiStar,
   HiOutlineClock,
   HiOutlineBookOpen,
   HiChartBar,
 } from "react-icons/hi";
+import { FaHeart, FaStar } from "react-icons/fa";
 
 const CourseCard = ({ course }) => {
   const { image, courseName, category, price, difficulty, duration, rating } =
@@ -20,7 +20,8 @@ const CourseCard = ({ course }) => {
         <div className="card__content">
           {/* Row 1: Wishlist Icon (Hidden by default, slides in on hover) */}
           <div className="card__wishlist">
-            <HiOutlineHeart size={18} />
+            <HiOutlineHeart className="wishlist default" size={18} />
+            <FaHeart className="wishlist hover" size={18} />
           </div>
 
           {/* Row 2: Image Only */}
@@ -45,13 +46,13 @@ const CourseCard = ({ course }) => {
           {/* Row 4: Difficulty, Duration, Rating (Same Row) */}
           <div className="card__meta_row">
             <span className="meta_item">
-              <HiChartBar /> {difficulty}
+              <HiChartBar size={18} className="icon" /> {difficulty}
             </span>
             <span className="meta_item">
-              <HiOutlineClock /> {duration}
+              <HiOutlineClock size={18} className="icon" /> {duration}
             </span>
-            <span className="meta_item rating">
-              <HiStar className="text-yellow-500" /> {rating}
+            <span className="meta_item">
+              <FaStar size={18} className=" icon" /> {rating}
             </span>
           </div>
 
@@ -138,7 +139,7 @@ const StyledWrapper = styled.div`
     top: 12px;
     right: -40px; /* Start outside the card */
     background: white;
-    color: #64748b;
+    color: #0077b6;
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -155,6 +156,36 @@ const StyledWrapper = styled.div`
   .card:hover .card__wishlist {
     right: 12px; /* Slide into view */
     opacity: 1;
+  }
+
+  /* Icons stacked */
+  .wishlist {
+    position: absolute;
+    transition: all 0.3s ease;
+  }
+
+  /* Default icon visible */
+  .wishlist.default {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Hover icon hidden */
+  .wishlist.hover {
+    opacity: 0;
+    transform: scale(0.5);
+    color: #b30000;
+  }
+
+  /* When hovering wishlist → swap */
+  .card__wishlist:hover .default {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .card__wishlist:hover .hover {
+    opacity: 1;
+    transform: scale(1.1);
   }
 
   .card__image_container {
@@ -178,7 +209,7 @@ const StyledWrapper = styled.div`
   .course-img {
     width: 100%;
     height: 100%;
-    /* This is the magic line: it crops the image to fill the 130px 
+    /* This is the magic line: it crops the image to fill the 180px 
        without stretching or changing the card's height */
     object-fit: cover;
     display: block;
@@ -218,7 +249,7 @@ const StyledWrapper = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.65rem;
+    font-size: 1.05rem;
     color: #64748b;
     margin-bottom: 10px;
     background: rgba(255, 255, 255, 0.5);
@@ -230,6 +261,10 @@ const StyledWrapper = styled.div`
     display: flex;
     align-items: center;
     gap: 3px;
+  }
+
+  .icon {
+    color: #0077b6;
   }
 
   .card__title {
