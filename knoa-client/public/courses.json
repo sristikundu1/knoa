@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "courseName": "Full-Stack Web Development with React & Node",
+    "category": "Development",
+    "price": 49.99,
+    "difficulty": "Beginner",
+    "duration": "45h",
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1470"
+  },
+  {
+    "id": 2,
+    "courseName": "Mastering UI/UX Design with Figma",
+    "category": "Design",
+    "price": 39.99,
+    "difficulty": "Intermediate",
+    "duration": "22h",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1586717791821-3f44a563dc4c?q=80&w=1470"
+  },
+  {
+    "id": 3,
+    "courseName": "Digital Marketing Strategy 2026",
+    "category": "Marketing",
+    "price": 29.99,
+    "difficulty": "Beginner",
+    "duration": "15h",
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1426"
+  },
+  {
+    "id": 4,
+    "courseName": "Advanced Python for Data Science",
+    "category": "Data Science",
+    "price": 59.99,
+    "difficulty": "Advanced",
+    "duration": "38h",
+    "rating": 5.0,
+    "image": "https://images.unsplash.com/photo-1551288049-bbda4865cda1?q=80&w=1470"
+  },
+  {
+    "id": 5,
+    "courseName": "Mobile App Development with Flutter",
+    "category": "Development",
+    "price": 44.99,
+    "difficulty": "Intermediate",
+    "duration": "30h",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=1470"
+  },
+  {
+    "id": 6,
+    "courseName": "Ethical Hacking: Zero to Hero",
+    "category": "Cybersecurity",
+    "price": 69.99,
+    "difficulty": "Advanced",
+    "duration": "52h",
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1470"
+  },
+  {
+    "id": 7,
+    "courseName": "Business Analysis Fundamentals",
+    "category": "Business",
+    "price": 34.99,
+    "difficulty": "Beginner",
+    "duration": "18h",
+    "rating": 4.6,
+    "image": "https://images.unsplash.com/photo-1454165833767-027ffea9e778?q=80&w=1470"
+  },
+  {
+    "id": 8,
+    "courseName": "Professional Photography Masterclass",
+    "category": "Photography",
+    "price": 24.99,
+    "difficulty": "Beginner",
+    "duration": "10h",
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1528"
+  },
+  {
+    "id": 9,
+    "courseName": "Modern JavaScript: ES6 to ESNext",
+    "category": "Development",
+    "price": 19.99,
+    "difficulty": "Intermediate",
+    "duration": "25h",
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=1470"
+  },
+  {
+    "id": 10,
+    "courseName": "Stock Market Investing for Beginners",
+    "category": "Finance",
+    "price": 49.99,
+    "difficulty": "Beginner",
+    "duration": "12h",
+    "rating": 4.5,
+    "image": "https://images.unsplash.com/photo-1611974714851-eb6077e3d307?q=80&w=1470"
+  }
+]

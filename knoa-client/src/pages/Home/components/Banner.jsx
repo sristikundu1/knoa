@@ -26,7 +26,7 @@ const Banner = () => {
           {/* Main Heading */}
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
             Master New Skills <br />
-            <span className="text-[#03045e] inline-block">
+            <span className="text-[#0077b6] inline-block">
               <Typewriter
                 options={{
                   strings: ["Anytime Anywhere"],

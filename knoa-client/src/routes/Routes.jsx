@@ -17,6 +17,7 @@ const Routes = createBrowserRouter([
       {
         index: true,
         element: <Home></Home>,
+        loader: () => fetch("/courses.json"),
       },
     ],
   },
