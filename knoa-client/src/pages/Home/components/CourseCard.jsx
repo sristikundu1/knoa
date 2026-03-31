@@ -71,7 +71,7 @@ const CourseCard = ({ course }) => {
 
 const StyledWrapper = styled.div`
   .card {
-    --card-bg: #f0f9ff;
+    --card-bg: #eff6ff;
     --card-accent: #00b4d8;
     --grad-1: #39b8ad;
     --grad-2: #7f81c8;

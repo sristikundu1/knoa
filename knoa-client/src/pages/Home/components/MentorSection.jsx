@@ -77,8 +77,8 @@ const MentorSection = () => {
           <span className="text-[#0077b6] font-bold tracking-[0.2em] uppercase text-xs px-3 py-1 bg-[#39B8AD]/10 rounded-full">
             Our Experts
           </span>
-          <h2 className="text-4xl md:text-5xl font-extrabold leading-tight mb-6">
-            Guided by the Best <br />{" "}
+          <h2 className="text-3xl md:text-4xl font-extrabold leading-tight mb-6 text-white">
+            Guided by the Best <br />
             <span className="text-[#00b4d8]">Industry Mentors</span>
           </h2>
           <p className="text-gray-400 mb-8 max-w-lg leading-relaxed">

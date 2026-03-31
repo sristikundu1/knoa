@@ -36,7 +36,7 @@ const WhyUs = () => {
     .card {
       width: 280px;
       height: 250px;
-      background: #f0f9ff;
+      background: #eff6ff;
       border-radius: 10px;
       padding: 50px 30px;
       position: relative;
@@ -66,6 +66,7 @@ const WhyUs = () => {
       font-size: 20px;
       font-weight: 800;
       margin-bottom: 20px;
+      color: #03045e;
     }
 
     .number {
