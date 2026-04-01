@@ -4,6 +4,7 @@ import { HiStatusOnline } from "react-icons/hi";
 import { AiOutlineLaptop } from "react-icons/ai";
 import { GiNotebook } from "react-icons/gi";
 import { RiVideoOnAiFill } from "react-icons/ri";
+import { Link } from "react-router";
 
 const MentorSection = () => {
   const iconVariants = {
@@ -87,9 +88,11 @@ const MentorSection = () => {
             mentors provide personalized career coaching and mock interviews to
             ensure you are job-ready from day one.
           </p>
-          <button className="bg-[#00b4d8]  text-white  px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-[#03045e] transition-all">
-            Meet Our Mentors
-          </button>
+          <Link to={"/mentors"}>
+            <button className="bg-[#00b4d8]  text-white  px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-[#03045e] transition-all">
+              Meet Our Mentors
+            </button>
+          </Link>
         </div>
 
         {/* Right Side: 2x2 Grid */}

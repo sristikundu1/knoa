@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 
@@ -37,6 +37,7 @@ async function run() {
 
     // create the colletion in DB
     const courseCollection = client.db("KnoaDB").collection("courses");
+    const userCollection = client.db("KnoaDB").collection("users");
 
     // get the data from database
     app.get("/courses", async (req, res) => {
@@ -47,6 +48,43 @@ async function run() {
     app.post("/courses", async (req, res) => {
       const courses = req.body;
       const result = await courseCollection.insertOne(courses);
+      res.send(result);
+    });
+
+    // API for user
+    // get all the user data from database
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get the user data according to email from database
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      res.send(user);
+    });
+
+    //  post the data in the database
+    app.post("/users", async (req, res) => {
+      const usersProfile = req.body;
+      const result = await userCollection.insertOne(usersProfile);
+      res.send(result);
+    });
+
+    // mentor API handle
+    // Get a single mentor's details by their ID
+    app.get("/users/mentor/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Get ONLY users who are mentors (for your Mentors Page)
+    app.get("/mentors", async (req, res) => {
+      const query = { role: "mentor" }; // Filter by role
+      const result = await userCollection.find(query).toArray();
       res.send(result);
     });
 

@@ -1,12 +1,16 @@
-import React from "react";
+import React, { use } from "react";
 import { BiSolidBookAdd } from "react-icons/bi";
 import { BsChatDots } from "react-icons/bs";
+import { CgProfile } from "react-icons/cg";
 import { HiOutlineLogout } from "react-icons/hi";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { RiBookShelfFill } from "react-icons/ri";
 import { Link, NavLink } from "react-router";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const DashboardLeft = () => {
+  const { logOut } = use(AuthContext);
+
   const menuItems = [
     { name: "Dashboard", path: "/dashboard", icon: <LuLayoutDashboard /> },
     {
@@ -19,7 +23,23 @@ const DashboardLeft = () => {
       path: "/dashboard/all-courses",
       icon: <RiBookShelfFill />,
     },
+    {
+      name: "Profile",
+      path: "/dashboard/profile",
+      icon: <CgProfile />,
+    },
   ];
+
+  const handleLogOut = () => {
+    logOut()
+      .then(() => {
+        toast.success("LogOut Successfully!");
+      })
+      .catch((error) => {
+        // An error happened.
+        toast.error(error);
+      });
+  };
   return (
     <div className="w-64 bg-white h-screen border-r border-blue-100 p-6 flex flex-col justify-between">
       {/* Top Section: Logo & Nav */}
@@ -66,7 +86,7 @@ const DashboardLeft = () => {
         </button>
 
         <button
-          onClick={() => console.log("Logout Logic Here")}
+          onClick={handleLogOut}
           className="flex items-center gap-4 px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg transition-all w-full text-left"
         >
           <span className="text-xl">

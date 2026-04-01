@@ -169,6 +169,36 @@ const AddCourse = () => {
                 />
               </div>
 
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium text-slate-600">
+                    Rating
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  name="rating"
+                  placeholder="rating"
+                  className="input input-bordered bg-slate-50"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium text-slate-600">
+                    Mentor
+                  </span>
+                </label>
+                <select
+                  name="mentor"
+                  className="select select-bordered bg-slate-50"
+                >
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+              </div>
+
               {/* Short Description: Now spans 2 columns */}
               <div className="form-control md:col-span-2">
                 <label className="label">
@@ -287,20 +317,6 @@ const AddCourse = () => {
                 defaultValue={isFree ? 0 : ""}
                 placeholder="0"
                 className="input input-bordered bg-slate-50 font-bold text-[#0077b6]"
-              />
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium text-slate-600">
-                  Rating
-                </span>
-              </label>
-              <input
-                type="text"
-                name="rating"
-                placeholder="rating"
-                className="input input-bordered bg-slate-50"
               />
             </div>
           </motion.div>

@@ -1,21 +1,29 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import styled from "styled-components";
 import { FcGoogle } from "react-icons/fc";
 import Swal from "sweetalert2";
 import { Link } from "react-router";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const Register = () => {
   const [step, setStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState("student");
 
+  // FIXED: Added state to store Step 1 data so Step 2 can access it
+  const [step1Data, setStep1Data] = useState({});
+
+  const { signupUser, updateUser } = use(AuthContext);
+
   const handleNext = (e) => {
     e.preventDefault();
     const form = e.currentTarget.closest("form");
     const data = new FormData(form);
+    const dataObj = Object.fromEntries(data.entries());
 
-    // Check role to decide if we go to Step 2
-    const role = data.get("role");
-    if (role === "mentor") {
+    // Save Step 1 data to state so we can use it in Step 2's hidden fields
+    setStep1Data(dataObj);
+
+    if (dataObj.role === "mentor") {
       setStep(2);
     } else {
       handleSignUp(form);
@@ -24,14 +32,54 @@ const Register = () => {
 
   const handleSignUp = (formElement) => {
     const formData = new FormData(formElement);
-    const { email, password, ...restProfileData } = Object.fromEntries(
-      formData.entries(),
-    );
-  };
+    const dataObj = Object.fromEntries(formData.entries());
 
-  const submitToDatabase = () => {
-    console.log("Final Object for MongoDB:", formData);
-    alert("Registration Complete!");
+    // Destructure specifically to get name and profileImage for the update
+    const { email, password, name, profileImage, ...restProfileData } = dataObj;
+
+    signupUser(email, password)
+      .then((result) => {
+        // 1. Update Firebase Profile so Navbar can see the name and image
+        return updateUser({
+          displayName: name,
+          photoURL: profileImage,
+        }).then(() => result); // Pass the result forward to the next .then
+      })
+      .then((result) => {
+        // 2. Prepare the object for MongoDB
+        const userInfo = {
+          email,
+          name, // include name explicitly
+          profileImage, // include image explicitly
+          ...restProfileData,
+          role: selectedRole,
+          rating: restProfileData.rating || (selectedRole === "mentor" ? 5 : 0),
+          creationTime: result.user?.metadata.creationTime,
+          uid: result.user?.uid, // used for linking DB and Auth
+        };
+
+        // 3. Send to MongoDB
+        return fetch("http://localhost:3000/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userInfo),
+        });
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.insertedId) {
+          Swal.fire("Good job!", "User added successfully!", "success");
+          setStep(1);
+          formElement.reset();
+          setStep1Data({});
+        }
+      })
+      .catch((error) => {
+        console.error("Signup Error:", error);
+        Swal.fire("Error", error.message, "error");
+      });
   };
 
   return (
@@ -51,7 +99,6 @@ const Register = () => {
         >
           {step === 1 ? (
             <>
-              {/* --- STEP 1 user signup --- */}
               <input
                 required
                 className="input"
@@ -114,7 +161,22 @@ const Register = () => {
             </>
           ) : (
             <>
-              {/* --- STEP 2: ONLY MENTOR INFO --- */}
+              {/* HIDDEN INPUTS: These carry Step 1 data into the final form submission */}
+              <input type="hidden" name="name" value={step1Data.name || ""} />
+              <input type="hidden" name="email" value={step1Data.email || ""} />
+              <input
+                type="hidden"
+                name="password"
+                value={step1Data.password || ""}
+              />
+              <input type="hidden" name="role" value={selectedRole} />
+              <input type="hidden" name="phone" value={step1Data.phone || ""} />
+              <input
+                type="hidden"
+                name="profileImage"
+                value={step1Data.profileImage || ""}
+              />
+
               <p className="step-info">Professional Details</p>
 
               <input
@@ -123,25 +185,19 @@ const Register = () => {
                 type="text"
                 name="expertise"
                 placeholder="Expertise (e.g., MERN, UI/UX)"
-                autoComplete="off" // Tells browser: "Don't auto-fill this"
               />
-
               <input
                 required
                 className="input"
                 type="number"
                 name="experienceYears"
                 placeholder="Years of Experience"
-                autoComplete="off"
               />
-
-              {/* Social Links */}
               <input
                 className="input"
                 type="url"
                 name="linkedin"
                 placeholder="LinkedIn URL"
-                autoComplete="off"
               />
               <input
                 className="input"
@@ -149,7 +205,6 @@ const Register = () => {
                 name="git"
                 placeholder="Git URL"
               />
-
               <textarea
                 required
                 className="input textarea"
@@ -159,12 +214,13 @@ const Register = () => {
               />
 
               <div className="rating-input">
-                <label>Initial Rating Display:</label>
+                <label>Initial Rating Display (1-5):</label>
                 <input
                   type="number"
                   name="rating"
                   min="1"
                   max="5"
+                  defaultValue="5"
                   className="input"
                 />
               </div>
@@ -205,19 +261,16 @@ const Register = () => {
   );
 };
 
+// ... (StyledWrapper remains exactly as you provided) ...
+
 const StyledWrapper = styled.div`
-  /* STYLES KEPT SAME TO MAINTAIN DESIGN */
   .container {
-    max-width: 550px;
-    background: linear-gradient(
-      0deg,
-      rgb(255, 255, 255) 0%,
-      rgb(244, 247, 251) 100%
-    );
+    max-width: 450px; /* Adjusted for better form fit */
+    background: linear-gradient(0deg, #fff 0%, #f4f7fb 100%);
     border-radius: 40px;
     padding: 25px 35px;
-    border: 5px solid rgb(255, 255, 255);
-    box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 30px 30px -20px;
+    border: 5px solid #fff;
+    box-shadow: rgba(133, 189, 215, 0.87) 0px 30px 30px -20px;
     margin: 20px auto;
   }
 
@@ -250,15 +303,15 @@ const StyledWrapper = styled.div`
     margin-top: 10px;
   }
   .rating-input {
-    margin-top: 10px;
-    font-size: 11px;
+    margin-top: 15px;
+    font-size: 12px;
     color: #666;
     padding-left: 10px;
   }
 
   .select-input {
     appearance: none;
-    color: rgb(170, 170, 170);
+    color: #888;
     cursor: pointer;
   }
   .form .input:focus {
@@ -271,7 +324,7 @@ const StyledWrapper = styled.div`
     margin-top: 15px;
     text-align: center;
     font-size: 11px;
-    color: rgb(170, 170, 170);
+    color: #aaa;
   }
   .login-link a {
     color: #0099ff;
@@ -288,7 +341,7 @@ const StyledWrapper = styled.div`
     padding-block: 15px;
     margin: 20px auto 10px auto;
     border-radius: 20px;
-    box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 20px 10px -15px;
+    box-shadow: rgba(133, 189, 215, 0.87) 0px 20px 10px -15px;
     border: none;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
@@ -302,7 +355,9 @@ const StyledWrapper = styled.div`
     font-size: 12px;
     cursor: pointer;
     text-decoration: underline;
+    margin-top: 5px;
   }
+
   .social-account-container {
     margin-top: 25px;
   }
@@ -310,9 +365,10 @@ const StyledWrapper = styled.div`
     display: block;
     text-align: center;
     font-size: 10px;
-    color: rgb(170, 170, 170);
+    color: #aaa;
     margin-bottom: 10px;
   }
+
   .new-google-btn {
     background: white;
     position: relative;
@@ -327,7 +383,7 @@ const StyledWrapper = styled.div`
     border-radius: 25px;
     outline: none;
     overflow: hidden;
-    color: #03045e; /* Dark grey text */
+    color: #03045e;
     transition: all 0.3s ease;
     width: 100%;
     z-index: 1;
@@ -338,17 +394,16 @@ const StyledWrapper = styled.div`
     z-index: 2;
   }
 
-  /* The Fill Effect */
   .new-google-btn::before {
     content: "";
     position: absolute;
     top: 50%;
-    left: 50%; /* Center the starting point */
+    left: 50%;
     width: 0;
     height: 0;
-    background: rgba(66, 133, 244, 0.1); /* Google Blue with low opacity */
+    background: rgba(66, 133, 244, 0.1);
     border-radius: 50%;
-    transform: translate(-50%, -50%); /* Center the circle */
+    transform: translate(-50%, -50%);
     transition:
       width 0.6s ease-out,
       height 0.6s ease-out;
@@ -356,14 +411,13 @@ const StyledWrapper = styled.div`
   }
 
   .new-google-btn:hover {
-    border-color: #4285f4; /* Changes to Google Blue on hover */
+    border-color: #4285f4;
     color: #174ea6;
     box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
   }
 
-  /* This expands the circle to cover the whole button from the center */
   .new-google-btn:hover::before {
-    width: 100%;
+    width: 150%;
     height: 400px;
   }
 `;

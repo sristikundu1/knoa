@@ -1,8 +1,10 @@
-import React from "react";
+import React, { use } from "react";
 import { CiSearch } from "react-icons/ci";
 import { IoIosNotifications } from "react-icons/io";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const DashboardNav = () => {
+  const { user } = use(AuthContext);
   return (
     <div className="navbar bg-white rounded-2xl shadow-sm border border-blue-50 px-6 h-20">
       {/* 1. Search Section (Remains the same) */}
@@ -57,25 +59,50 @@ const DashboardNav = () => {
         </div>
 
         {/* User Profile Info (No Dropdown) */}
-        <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-[#03045e] leading-none">
-              John Doe
-            </p>
-            <p className="text-[11px] font-medium text-[#00b4d8] mt-1 uppercase tracking-wider">
-              Student
-            </p>
-          </div>
+        {user ? (
+          <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold text-[#03045e] leading-none">
+                {user?.displayName}
+              </p>
+              <p className="text-[11px] font-medium text-[#00b4d8] mt-1 uppercase tracking-wider">
+                {user?.role || "User"}
+              </p>
+            </div>
 
-          <div className="avatar">
-            <div className="w-10 h-10 rounded-full ring ring-blue-50 ring-offset-2">
-              <img
-                alt="User Profile"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-              />
+            <div className="avatar">
+              <div className="w-10 h-10 rounded-full ring ring-blue-50 ring-offset-2">
+                <img
+                  alt="User Profile"
+                  src={
+                    user?.photoURL ||
+                    "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  }
+                />
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold text-[#03045e] leading-none">
+                John Doe
+              </p>
+              <p className="text-[11px] font-medium text-[#00b4d8] mt-1 uppercase tracking-wider">
+                Student
+              </p>
+            </div>
+
+            <div className="avatar">
+              <div className="w-10 h-10 rounded-full ring ring-blue-50 ring-offset-2">
+                <img
+                  alt="User Profile"
+                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

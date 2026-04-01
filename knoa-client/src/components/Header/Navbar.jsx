@@ -1,7 +1,21 @@
-import React from "react";
+import React, { use } from "react";
 import { Link, NavLink } from "react-router";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const Navbar = () => {
+  const { logOut, user } = use(AuthContext);
+
+  const handleLogOut = () => {
+    logOut()
+      .then(() => {
+        toast.success("LogOut Successfully!");
+      })
+      .catch((error) => {
+        // An error happened.
+        toast.error(error);
+      });
+  };
+
   const links = (
     <>
       <li>
@@ -79,11 +93,35 @@ const Navbar = () => {
           <ul className="menu menu-horizontal px-1">{links}</ul>
         </div>
         <div className="navbar-end">
-          <Link to={"/auth/register"}>
-            <button className="btn bg-[#00b4d8] text-white  font-bold text-lg py-6 border-none hover:bg-[#03045e] px-8 rounded-lg ">
-              Sign Up
-            </button>
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
+              <div className="min-w-10 min-h-10 shrink-0">
+                <img
+                  className="w-10 h-10 rounded-full object-cover "
+                  alt="userImage"
+                  src={
+                    user?.photoURL ||
+                    "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  }
+                />
+              </div>
+
+              <div className="text-right hidden sm:block">
+                <button
+                  onClick={handleLogOut}
+                  className="btn bg-[#00b4d8] text-white  font-bold text-lg py-6 border-none hover:bg-[#03045e] px-8 rounded-lg "
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link to={"/auth/register"}>
+              <button className="btn bg-[#00b4d8] text-white  font-bold text-lg py-6 border-none hover:bg-[#03045e] px-8 rounded-lg ">
+                Sign Up
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>

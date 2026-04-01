@@ -8,6 +8,9 @@ import Register from "./../pages/Register/Register";
 import DashboardLayout from "./../layouts/DashboardLayout";
 import DashboardHome from "./../pages/DashboardHome/DashboardHome";
 import AddCourse from "../pages/AddCourse/AddCourse";
+import Profile from "../pages/Profile/Profile";
+import Mentors from "../pages/Mentors/Mentors";
+import MentorDetails from "../pages/MentorDetails/MentorDetails";
 
 const Routes = createBrowserRouter([
   {
@@ -19,6 +22,17 @@ const Routes = createBrowserRouter([
         index: true,
         element: <Home></Home>,
         loader: () => fetch("http://localhost:3000/courses"),
+      },
+      {
+        path: "mentors",
+        element: <Mentors></Mentors>,
+        loader: () => fetch("http://localhost:3000/mentors"),
+      },
+      {
+        path: "mentor/:id",
+        element: <MentorDetails></MentorDetails>,
+        loader: ({ params }) =>
+          fetch(`http://localhost:3000/users/mentor/${params.id}`),
       },
     ],
   },
@@ -51,6 +65,10 @@ const Routes = createBrowserRouter([
       {
         path: "/dashboard/all-courses",
         element: <AddCourse></AddCourse>,
+      },
+      {
+        path: "/dashboard/profile",
+        element: <Profile></Profile>,
       },
     ],
   },
