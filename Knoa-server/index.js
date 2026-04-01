@@ -38,6 +38,11 @@ async function run() {
     // create the colletion in DB
     const courseCollection = client.db("KnoaDB").collection("courses");
 
+    // get the data from database
+    app.get("/courses", async (req, res) => {
+      const result = await courseCollection.find().toArray();
+      res.send(result);
+    });
     //  post the data in the database
     app.post("/courses", async (req, res) => {
       const courses = req.body;
