@@ -280,7 +280,7 @@ const StyledWrapper = styled.div`
     bottom: -60px;
     left: 50%;
     transform: translateX(-50%);
-    background: #03045e;
+    background: #00b4d8;
     color: white;
     border: none;
     padding: 8px 20px;

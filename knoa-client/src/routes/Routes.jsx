@@ -7,6 +7,7 @@ import Login from "./../pages/Login/Login";
 import Register from "./../pages/Register/Register";
 import DashboardLayout from "./../layouts/DashboardLayout";
 import DashboardHome from "./../pages/DashboardHome/DashboardHome";
+import AddCourse from "../pages/AddCourse/AddCourse";
 
 const Routes = createBrowserRouter([
   {
@@ -42,6 +43,14 @@ const Routes = createBrowserRouter([
       {
         index: true,
         element: <DashboardHome />,
+      },
+      {
+        path: "/dashboard/add-course",
+        element: <AddCourse></AddCourse>,
+      },
+      {
+        path: "/dashboard/all-courses",
+        element: <AddCourse></AddCourse>,
       },
     ],
   },
