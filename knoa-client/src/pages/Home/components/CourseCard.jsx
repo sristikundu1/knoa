@@ -9,8 +9,16 @@ import {
 import { FaHeart, FaStar } from "react-icons/fa";
 
 const CourseCard = ({ course }) => {
-  const { image, courseName, category, price, difficulty, duration, rating } =
-    course;
+  const {
+    isFree,
+    thumbnail,
+    courseName,
+    category,
+    price,
+    difficulty,
+    duration,
+    rating,
+  } = course;
   return (
     <StyledWrapper>
       <div className="card">
@@ -27,11 +35,7 @@ const CourseCard = ({ course }) => {
           {/* Row 2: Image Only */}
           <div className="card__image_container">
             <div className="card__image">
-              <img
-                src={course.image}
-                alt={course.courseName}
-                className="course-img"
-              />
+              <img src={thumbnail} alt={courseName} className="course-img" />
             </div>
           </div>
 
@@ -40,7 +44,13 @@ const CourseCard = ({ course }) => {
             <span className="category_tag">
               <HiOutlineBookOpen /> {category}
             </span>
-            <span className="card__price">${price}</span>
+            {isFree ? (
+              <span className="card__price text-green-600 font-bold">Free</span>
+            ) : (
+              <span className="card__price text-[#03045e] font-bold">
+                ${price}
+              </span>
+            )}
           </div>
 
           {/* Row 4: Difficulty, Duration, Rating (Same Row) */}
