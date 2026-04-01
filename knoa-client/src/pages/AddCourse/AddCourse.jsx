@@ -5,6 +5,7 @@ import { IoPricetagsOutline } from "react-icons/io5";
 import { GiClassicalKnowledge } from "react-icons/gi";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import Swal from "sweetalert2";
 
 const AddCourse = () => {
   const [isFree, setIsFree] = useState(false);
@@ -34,7 +35,24 @@ const AddCourse = () => {
     courseData.isFree = formData.get("free") === "on";
     delete courseData.free;
 
-    console.log(courseData);
+    // console.log(courseData);
+
+    fetch("http://localhost:3000/courses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(courseData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log(data);
+        if (data.insertedId) {
+          Swal.fire("successfully created the course!");
+
+          form.reset();
+        }
+      });
   };
   // Animation Variants
   const containerVariants = {
@@ -107,15 +125,16 @@ const AddCourse = () => {
                 </label>
                 <select
                   name="category"
+                  defaultValue=""
                   className="select select-bordered bg-slate-50"
                 >
-                  <option disabled selected>
+                  <option value="" disabled>
                     Select Category
                   </option>
-                  <option>Development</option>
-                  <option>Design</option>
-                  <option>Marketing</option>
-                  <option>Business</option>
+                  <option value="development">Development</option>
+                  <option value="design">Design</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="business">Business</option>
                 </select>
               </div>
 
@@ -267,6 +286,20 @@ const AddCourse = () => {
                 defaultValue={isFree ? 0 : ""}
                 placeholder="0"
                 className="input input-bordered bg-slate-50 font-bold text-[#0077b6]"
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium text-slate-600">
+                  Rating
+                </span>
+              </label>
+              <input
+                type="text"
+                name="rating"
+                placeholder="rating"
+                className="input input-bordered bg-slate-50"
               />
             </div>
           </motion.div>
