@@ -14,6 +14,8 @@ import MentorDetails from "../pages/MentorDetails/MentorDetails";
 import Courses from "../pages/Courses/Courses";
 import CourseDetails from "../pages/CourseDetails/CourseDetails";
 import EditCourse from "../pages/EditCourse/EditCourse";
+import Contact from "../pages/Contact/Contact";
+import FAQ from "../pages/FAQ/FAQ";
 
 const Routes = createBrowserRouter([
   {
@@ -36,6 +38,14 @@ const Routes = createBrowserRouter([
         element: <MentorDetails></MentorDetails>,
         loader: ({ params }) =>
           fetch(`http://localhost:3000/users/mentor/${params.id}`),
+      },
+      {
+        path: "contact",
+        element: <Contact></Contact>,
+      },
+      {
+        path: "faq",
+        element: <FAQ></FAQ>,
       },
     ],
   },

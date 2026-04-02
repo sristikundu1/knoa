@@ -31,13 +31,24 @@ const Navbar = () => {
       </li>
       <li>
         <NavLink
-          to="/courses"
+          to="/contact"
           className={({ isActive }) =>
             `text-lg font-bold text-[#00b4d8] drop-shadow-md transition-all duration-200 
           ${isActive ? "underline decoration-[#03045e]  decoration-2 underline-offset-4" : "hover:text-[#03045e]"}`
           }
         >
-          Courses
+          Contact
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/faq"
+          className={({ isActive }) =>
+            `text-lg font-bold text-[#00b4d8] drop-shadow-md transition-all duration-200 
+          ${isActive ? "underline decoration-[#03045e]  decoration-2 underline-offset-4" : "hover:text-[#03045e]"}`
+          }
+        >
+          FAQ
         </NavLink>
       </li>
       <li>

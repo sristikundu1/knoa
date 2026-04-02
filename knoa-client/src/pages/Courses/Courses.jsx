@@ -5,7 +5,8 @@ import CourseFilter from "./components/CourseFilter";
 
 const Courses = () => {
   const allCourses = useLoaderData();
-  //   console.log(allCourses);
+
+  const [courses, setCourses] = useState(allCourses);
 
   // 1. Create states for the filters
   const [category, setCategory] = useState("All");
@@ -13,7 +14,7 @@ const Courses = () => {
   const [price, setPrice] = useState("All");
 
   // 2. Simple Filter Logic
-  const displayCourses = allCourses.filter((course) => {
+  const displayCourses = courses.filter((course) => {
     const categoryMatch =
       category === "All" || course.category === category.toLowerCase();
     const levelMatch = level === "All Course" || course.difficulty === level;
@@ -37,7 +38,12 @@ const Courses = () => {
       <div className="flex-1 space-y-6">
         {displayCourses.length > 0 ? (
           displayCourses.map((course) => (
-            <CourseCard key={course._id} course={course} />
+            <CourseCard
+              key={course._id}
+              course={course}
+              setCourses={setCourses}
+              courses={courses}
+            />
           ))
         ) : (
           <p className="text-center py-10 text-slate-500">
