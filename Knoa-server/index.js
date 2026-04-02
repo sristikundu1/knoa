@@ -44,10 +44,35 @@ async function run() {
       const result = await courseCollection.find().toArray();
       res.send(result);
     });
+
+    app.get("/course/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await courseCollection.findOne(query);
+      res.send(result);
+    });
+
     //  post the data in the database
     app.post("/courses", async (req, res) => {
       const courses = req.body;
       const result = await courseCollection.insertOne(courses);
+      res.send(result);
+    });
+
+    // update course details
+    app.put("/course/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedCourse = req.body;
+      const updateDoc = {
+        $set: updatedCourse,
+      };
+      const result = await courseCollection.updateOne(
+        filter,
+        updateDoc,
+        options,
+      );
       res.send(result);
     });
 

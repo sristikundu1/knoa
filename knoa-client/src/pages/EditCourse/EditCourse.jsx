@@ -6,10 +6,29 @@ import { GiClassicalKnowledge } from "react-icons/gi";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import Swal from "sweetalert2";
+import { useLoaderData, useNavigate } from "react-router";
 
-const AddCourse = () => {
-  const [isFree, setIsFree] = useState(false);
-  const [description, setDescription] = useState("");
+const EditCourse = () => {
+  const {
+    _id,
+    courseName,
+    category,
+    difficulty,
+    duration,
+    rating,
+    mentorName,
+    shortDescription,
+    fullDescription,
+    tag,
+    language,
+    price,
+    isFree: initialIsFree,
+    thumbnail,
+    video,
+  } = useLoaderData();
+  const navigate = useNavigate();
+  const [isFree, setIsFree] = useState(initialIsFree || false);
+  const [description, setDescription] = useState(fullDescription || "");
   const [mentors, setMentors] = useState([]);
 
   // Toolbar configuration to keep the UI clean
@@ -32,7 +51,7 @@ const AddCourse = () => {
   }, []);
 
   // handle publish course button
-  const handleAddCourse = (e) => {
+  const handleEditCourse = (e) => {
     e.preventDefault();
 
     const form = e.target;
@@ -49,8 +68,8 @@ const AddCourse = () => {
 
     // console.log(courseData);
 
-    fetch("http://localhost:3000/courses", {
-      method: "POST",
+    fetch(`http://localhost:3000/course/${_id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -59,13 +78,13 @@ const AddCourse = () => {
       .then((res) => res.json())
       .then((data) => {
         // console.log(data);
-        if (data.insertedId) {
-          Swal.fire("successfully created the course!");
-
-          form.reset();
+        if (data.modifiedCount) {
+          Swal.fire("Updated!", "Course updated successfully", "success");
+          navigate("/dashboard/all-courses");
         }
       });
   };
+
   // Animation Variants
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -80,7 +99,6 @@ const AddCourse = () => {
     hidden: { opacity: 0, x: -10 },
     visible: { opacity: 1, x: 0 },
   };
-
   return (
     <motion.div
       initial="hidden"
@@ -91,14 +109,16 @@ const AddCourse = () => {
     >
       {/* Header Section */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-slate-800">Create New Course</h1>
+        <h1 className="text-2xl font-bold text-slate-800">
+          Update the course.
+        </h1>
         <p className="text-slate-500 text-sm">
-          Fill in the details below to publish your new masterpiece.
+          Make changes and keep your course content up to date.
         </p>
       </div>
 
       <form
-        onSubmit={handleAddCourse}
+        onSubmit={handleEditCourse}
         className="grid grid-cols-1 lg:grid-cols-3 gap-8"
       >
         {/* Left Column: Basic & Detailed Info */}
@@ -125,7 +145,7 @@ const AddCourse = () => {
                   name="courseName"
                   placeholder="e.g. Advanced React Patterns"
                   className="input input-bordered bg-slate-50 focus:border-blue-400 "
-                  required
+                  defaultValue={courseName}
                 />
               </div>
 
@@ -137,7 +157,7 @@ const AddCourse = () => {
                 </label>
                 <select
                   name="category"
-                  defaultValue=""
+                  defaultValue={category}
                   className="select select-bordered bg-slate-50"
                 >
                   <option value="" disabled>
@@ -161,6 +181,7 @@ const AddCourse = () => {
                 </label>
                 <select
                   name="difficulty"
+                  defaultValue={difficulty}
                   className="select select-bordered bg-slate-50"
                 >
                   <option>Beginner</option>
@@ -178,6 +199,7 @@ const AddCourse = () => {
                 <input
                   type="text"
                   name="duration"
+                  defaultValue={duration}
                   placeholder="25h"
                   className="input input-bordered bg-slate-50"
                 />
@@ -192,6 +214,7 @@ const AddCourse = () => {
                 <input
                   type="text"
                   name="rating"
+                  defaultValue={rating}
                   placeholder="rating"
                   className="input input-bordered bg-slate-50"
                 />
@@ -205,10 +228,10 @@ const AddCourse = () => {
                 </label>
                 <select
                   name="mentorName"
-                  required
+                  defaultValue={mentorName}
                   className="select select-bordered bg-slate-50"
                 >
-                  <option value="" disabled selected>
+                  <option value="" disabled>
                     Select a Mentor
                   </option>
 
@@ -231,8 +254,8 @@ const AddCourse = () => {
 
                 <textarea
                   name="shortDescription"
+                  defaultValue={shortDescription}
                   className="textarea textarea-bordered bg-slate-50 h-32 w-full"
-                  placeholder="What people can learn..."
                 ></textarea>
               </div>
 
@@ -250,7 +273,6 @@ const AddCourse = () => {
                     value={description}
                     onChange={setDescription}
                     modules={modules}
-                    placeholder="Detailed course curriculum and overview..."
                     className="bg-white min-h-[200px]"
                   />
                 </div>
@@ -284,7 +306,7 @@ const AddCourse = () => {
                 <input
                   type="text"
                   name="tag"
-                  placeholder="JavaScript, React, Web Dev"
+                  defaultValue={tag}
                   className="input input-bordered bg-slate-50"
                 />
               </div>
@@ -297,7 +319,7 @@ const AddCourse = () => {
                 <input
                   type="text"
                   name="language"
-                  placeholder="English"
+                  defaultValue={language}
                   className="input input-bordered bg-slate-50"
                 />
               </div>
@@ -324,6 +346,7 @@ const AddCourse = () => {
                 name="free"
                 type="checkbox"
                 className="toggle toggle-primary"
+                checked={isFree}
                 onChange={(e) => setIsFree(e.target.checked)}
               />
             </div>
@@ -335,8 +358,8 @@ const AddCourse = () => {
                 key={isFree ? "free" : "paid"}
                 type="number"
                 name="price"
+                defaultValue={price}
                 disabled={isFree}
-                defaultValue={isFree ? 0 : ""}
                 placeholder="0"
                 className="input input-bordered bg-slate-50 font-bold text-[#0077b6]"
               />
@@ -359,7 +382,7 @@ const AddCourse = () => {
               <input
                 type="text"
                 name="thumbnail"
-                placeholder="https://image-url.com"
+                defaultValue={thumbnail}
                 className="input input-bordered bg-slate-50 text-xs"
               />
             </div>
@@ -373,7 +396,7 @@ const AddCourse = () => {
                 <input
                   type="text"
                   name="video"
-                  placeholder="Video Link"
+                  defaultValue={video}
                   className="input input-bordered bg-slate-50 pl-10 text-xs w-full"
                 />
               </div>
@@ -410,7 +433,7 @@ const AddCourse = () => {
 
               {/* Button Content */}
               <span className="relative z-10 flex items-center justify-center gap-2 tracking-wide">
-                Publish Course
+                Update Course
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
@@ -446,4 +469,4 @@ const AddCourse = () => {
   );
 };
 
-export default AddCourse;
+export default EditCourse;

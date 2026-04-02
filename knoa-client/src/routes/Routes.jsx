@@ -11,6 +11,9 @@ import AddCourse from "../pages/AddCourse/AddCourse";
 import Profile from "../pages/Profile/Profile";
 import Mentors from "../pages/Mentors/Mentors";
 import MentorDetails from "../pages/MentorDetails/MentorDetails";
+import Courses from "../pages/Courses/Courses";
+import CourseDetails from "../pages/CourseDetails/CourseDetails";
+import EditCourse from "../pages/EditCourse/EditCourse";
 
 const Routes = createBrowserRouter([
   {
@@ -64,7 +67,20 @@ const Routes = createBrowserRouter([
       },
       {
         path: "/dashboard/all-courses",
-        element: <AddCourse></AddCourse>,
+        element: <Courses></Courses>,
+        loader: () => fetch("http://localhost:3000/courses"),
+      },
+      {
+        path: "course/:id",
+        element: <CourseDetails></CourseDetails>,
+        loader: ({ params }) =>
+          fetch(`http://localhost:3000/course/${params.id}`),
+      },
+      {
+        path: "edit-course/:id",
+        element: <EditCourse></EditCourse>,
+        loader: ({ params }) =>
+          fetch(`http://localhost:3000/course/${params.id}`),
       },
       {
         path: "/dashboard/profile",
