@@ -7,6 +7,7 @@ import {
   HiChartBar,
 } from "react-icons/hi";
 import { FaHeart, FaStar } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 const CourseCard = ({ course }) => {
   const {
@@ -19,6 +20,38 @@ const CourseCard = ({ course }) => {
     duration,
     rating,
   } = course;
+
+  const { _id, ...courseWithoutId } = course;
+  const handleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevents the card click if you have one
+
+    fetch("http://localhost:3000/wishlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(courseWithoutId),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.insertedId) {
+          Swal.fire({
+            title: "Added to Wishlist!",
+            text: `${courseName} is now in your favorites.`,
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false,
+            // Using your theme colors for the icon
+            iconColor: "#39b8ad",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Error adding to wishlist:", err);
+        Swal.fire("Error", "Could not add to wishlist", "error");
+      });
+  };
   return (
     <StyledWrapper>
       <div className="card">
@@ -27,7 +60,7 @@ const CourseCard = ({ course }) => {
 
         <div className="card__content">
           {/* Row 1: Wishlist Icon (Hidden by default, slides in on hover) */}
-          <div className="card__wishlist">
+          <div className="card__wishlist" onClick={handleWishlist}>
             <HiOutlineHeart className="wishlist default" size={18} />
             <FaHeart className="wishlist hover" size={18} />
           </div>

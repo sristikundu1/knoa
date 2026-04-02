@@ -16,6 +16,7 @@ import CourseDetails from "../pages/CourseDetails/CourseDetails";
 import EditCourse from "../pages/EditCourse/EditCourse";
 import Contact from "../pages/Contact/Contact";
 import FAQ from "../pages/FAQ/FAQ";
+import FavCourses from "./../pages/FavCourses/FavCourses";
 
 const Routes = createBrowserRouter([
   {
@@ -66,6 +67,8 @@ const Routes = createBrowserRouter([
   {
     path: "dashboard",
     element: <DashboardLayout />,
+    id: "dashboard-data",
+    loader: () => fetch("http://localhost:3000/wishlist"),
     children: [
       {
         index: true,
@@ -91,6 +94,10 @@ const Routes = createBrowserRouter([
         element: <EditCourse></EditCourse>,
         loader: ({ params }) =>
           fetch(`http://localhost:3000/course/${params.id}`),
+      },
+      {
+        path: "wishlist",
+        element: <FavCourses></FavCourses>,
       },
       {
         path: "/dashboard/profile",

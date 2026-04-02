@@ -38,6 +38,9 @@ async function run() {
     // create the colletion in DB
     const courseCollection = client.db("KnoaDB").collection("courses");
     const userCollection = client.db("KnoaDB").collection("users");
+    const FAvCourseCollection = client
+      .db("KnoaDB")
+      .collection("wishlistCourse");
 
     // get the data from database
     app.get("/courses", async (req, res) => {
@@ -80,6 +83,31 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await courseCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // wishlist API
+
+    // Updated GET route with sorting (Newest first)
+    app.get("/wishlist", async (req, res) => {
+      const result = await FAvCourseCollection.find()
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(result);
+    });
+
+    // post wishlist courses to the database
+    app.post("/wishlist", async (req, res) => {
+      const wishCourse = req.body;
+      const result = await FAvCourseCollection.insertOne(wishCourse);
+      res.send(result);
+    });
+
+    // delete the course from the wishlist
+    app.delete("/wishlist/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await FAvCourseCollection.deleteOne(query);
       res.send(result);
     });
 

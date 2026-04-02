@@ -1,10 +1,14 @@
-import React, { use } from "react";
+import React, { use, useEffect } from "react";
 import { CiSearch } from "react-icons/ci";
 import { IoIosNotifications } from "react-icons/io";
 import { AuthContext } from "../../contexts/AuthContext";
+import { useNavigate, useRouteLoaderData } from "react-router";
 
 const DashboardNav = () => {
   const { user } = use(AuthContext);
+  const navigate = useNavigate();
+  const wishCourses = useRouteLoaderData("dashboard-data");
+
   return (
     <div className="navbar bg-white rounded-2xl shadow-sm border border-blue-50 px-6 h-20">
       {/* 1. Search Section (Remains the same) */}
@@ -32,9 +36,15 @@ const DashboardNav = () => {
           >
             <div className="indicator">
               <IoIosNotifications />
-              <span className="badge badge-sm bg-[#0077b6] text-white rounded-full indicator-item border-none text-[10px]">
-                2
-              </span>
+              {wishCourses ? (
+                <span className="badge badge-sm bg-[#0077b6] text-white rounded-full indicator-item border-none text-[10px]">
+                  {wishCourses.length}
+                </span>
+              ) : (
+                <span className="badge badge-sm bg-[#0077b6] text-white rounded-full indicator-item border-none text-[10px]">
+                  0
+                </span>
+              )}
             </div>
           </div>
           {/* Notification dropdown content remains the same */}
@@ -47,10 +57,15 @@ const DashboardNav = () => {
                 Notifications
               </h3>
               <p className="text-slate-500 text-sm italic">
-                You have 2 new course updates.
+                {wishCourses.length > 0
+                  ? `You have ${wishCourses.length} course${wishCourses.length !== 1 ? "s" : ""} in wishlist.`
+                  : "Your wishlist is empty."}
               </p>
               <div className="card-actions mt-2">
-                <button className="btn bg-[#00b4d8] text-white  font-bold hover:bg-[#03045e] btn-sm btn-block normal-case">
+                <button
+                  onClick={() => navigate("/dashboard/wishlist")}
+                  className="btn bg-[#00b4d8] text-white  font-bold hover:bg-[#03045e] btn-sm btn-block normal-case"
+                >
                   View All
                 </button>
               </div>
