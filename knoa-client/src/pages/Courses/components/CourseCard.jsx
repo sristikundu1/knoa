@@ -6,7 +6,7 @@ import {
   FaStar,
 } from "react-icons/fa";
 import { Link } from "react-router";
-
+import { FiX } from "react-icons/fi";
 const CourseCard = ({ course }) => {
   const {
     thumbnail,
@@ -19,11 +19,18 @@ const CourseCard = ({ course }) => {
     rating,
   } = course;
   return (
-    <div>
+    <div className="relative">
       <div
         key={course._id}
-        className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col md:flex-row gap-6 shadow-sm hover:shadow-md transition-shadow"
+        className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col md:flex-row gap-6 shadow-sm hover:shadow-md transition-shadow relative"
       >
+        <button
+          onClick={() => handleDelete(course._id)}
+          className="absolute top-3 right-3 bg-white hover:bg-red-50 text-[#03045e] hover:text-[#03045e] p-2 rounded-full shadow-sm transition"
+        >
+          <FiX size={18} />
+        </button>
+
         {/* Course Image */}
         <div className="w-full md:w-64 h-44 overflow-hidden rounded-md">
           <img
@@ -36,16 +43,12 @@ const CourseCard = ({ course }) => {
         {/* Course Details */}
         <div className="flex-1 flex flex-col justify-between">
           <div>
-            <div className="flex justify-between items-start mb-2">
+            <div className="mb-2">
               <span className="text-[#0077b6] font-bold tracking-[0.2em] uppercase text-xs px-3 py-1 bg-[#39B8AD]/10 rounded-full">
                 {category}
               </span>
-              <span className="text-xl font-black text-slate-800">
-                {course.isFree || course.price === 0
-                  ? "FREE"
-                  : `$${course.price}`}
-              </span>
             </div>
+
             <h3 className="text-lg font-bold text-slate-800 leading-tight mb-4">
               {courseName}
             </h3>
@@ -63,19 +66,27 @@ const CourseCard = ({ course }) => {
                 <FaStar className="text-[#0077b6]" /> {rating}
               </span>
             </div>
+
+            <div className="mt-3">
+              <span className="text-xl font-black text-slate-800">
+                {course.isFree || course.price === 0
+                  ? "FREE"
+                  : `$${course.price}`}
+              </span>
+            </div>
           </div>
 
           <div className="flex gap-4">
             <Link
               to={`/dashboard/course/${course._id}`}
-              className="mt-4 flex items-center gap-2  text-sm hover:text-[#03045e] transition-colors text-white font-bold   px-3 py-1  rounded-full bg-[#00b4d8]  border-none  text-[0.8rem]  cursor-pointer "
+              className="mt-4 flex items-center gap-2 text-white font-bold px-3 py-1 rounded-full bg-[#00b4d8] text-[0.8rem]"
             >
               View Course <FaArrowAltCircleRight />
             </Link>
 
             <Link
               to={`/dashboard/edit-course/${course._id}`}
-              className="mt-4 flex items-center gap-2  text-sm hover:text-[#00b4d8] transition-colors text-white font-bold   px-3 py-1  rounded-full bg-[#03045e]  border-none  text-[0.8rem]  cursor-pointer"
+              className="mt-4 flex items-center gap-2 text-white font-bold px-3 py-1 rounded-full bg-[#03045e] text-[0.8rem]"
             >
               Edit Course <FaArrowAltCircleRight />
             </Link>

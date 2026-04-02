@@ -76,6 +76,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/course/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await courseCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // API for user
     // get all the user data from database
     app.get("/users", async (req, res) => {

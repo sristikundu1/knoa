@@ -261,7 +261,7 @@ const Accordion = ({ html }) => {
                         <img
                           src={lesson.image}
                           alt={lesson.title}
-                          className="rounded-xl mt-2 max-h-64 object-contain w-full  max-w-full "
+                          className="rounded-xl mt-2 max-h-64 object-cover w-full  max-w-full "
                         />
                       )}
                     </motion.div>
