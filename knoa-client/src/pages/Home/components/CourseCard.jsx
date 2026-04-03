@@ -8,6 +8,7 @@ import {
 } from "react-icons/hi";
 import { FaHeart, FaStar } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { Link } from "react-router";
 
 const CourseCard = ({ course }) => {
   const {
@@ -105,7 +106,9 @@ const CourseCard = ({ course }) => {
           </div>
 
           {/* View Course Button (Slides up from bottom) */}
-          <button className="view_course_btn">View Course</button>
+          <Link to={`/dashboard/course/${_id}`}>
+            <button className="view_course_btn">View Course</button>
+          </Link>
         </div>
       </div>
     </StyledWrapper>

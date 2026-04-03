@@ -40,6 +40,9 @@ async function run() {
     const FAvCourseCollection = client
       .db("KnoaDB")
       .collection("wishlistCourse");
+    const enrollmentCollection = client
+      .db("KnoaDB")
+      .collection("enrolledCourse");
 
     // get the data from database
     app.get("/courses", async (req, res) => {
@@ -157,6 +160,66 @@ async function run() {
       };
       const related = await userCollection.find(query).limit(3).toArray();
       res.send(related);
+    });
+
+    // dashboard API
+    // Add this route to your Express server
+    app.get("/stats/overview", async (req, res) => {
+      const totalCourses = await courseCollection.countDocuments();
+      const totalMentors = await userCollection.countDocuments({
+        role: "mentor",
+      });
+
+      // Filter mentors with rating >= 4.0 and limit to top 3
+      const highRatedMentors = await userCollection
+        .find({ role: "mentor", rating: { $gte: 4.0 } })
+        .sort({ rating: -1 })
+        .limit(3)
+        .toArray();
+
+      res.send({ totalCourses, totalMentors, highRatedMentors });
+    });
+
+    // enrollcourse API
+    app.post("/enroll", async (req, res) => {
+      const enrolledCourse = req.body;
+      // 1. Double check for existing enrollment
+      const alreadyEnrolled = await enrollmentCollection.findOne({
+        studentEmail: enrolledCourse.studentEmail,
+        courseId: enrolledCourse.courseId,
+      });
+
+      if (alreadyEnrolled) {
+        return res
+          .status(400)
+          .send({ message: "You are already in this course!" });
+      }
+      const result = await enrollmentCollection.insertOne(enrolledCourse);
+      res.send(result);
+    });
+
+    // for student profile
+    app.get("/my-enrolled-courses", async (req, res) => {
+      const email = req.query.email;
+
+      if (!email) {
+        return res.status(400).send({ message: "Email is required" });
+      }
+
+      // We search the enrollmentCollection for the student's email
+      const query = { studentEmail: email };
+      const result = await enrollmentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // for mentor profile
+    app.get("/courses-by-mentor", async (req, res) => {
+      const email = req.query.email;
+
+      // We search the main courseCollection for courses this mentor created
+      const query = { mentorEmail: email };
+      const result = await courseCollection.find(query).toArray();
+      res.send(result);
     });
 
     // AI chat

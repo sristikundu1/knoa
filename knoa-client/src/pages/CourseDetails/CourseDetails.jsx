@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useLoaderData, Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,16 +8,68 @@ import {
   FiPlus,
   FiMinus,
 } from "react-icons/fi";
+import { AuthContext } from "../../contexts/AuthContext";
+import Swal from "sweetalert2";
 
 const CourseDetails = () => {
   const course = useLoaderData();
+  const { user } = use(AuthContext);
   const [allCourse, setAllCourse] = useState([]);
+  const [isEnrolling, setIsEnrolling] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:3000/courses")
       .then((res) => res.json())
       .then((data) => setAllCourse(data));
   }, []);
+
+  // --- Enrollment Logic ---
+  const handleEnroll = () => {
+    setIsEnrolling(true);
+
+    const enrollmentData = {
+      courseId: course._id,
+      courseName: course.courseName,
+      courseImage: course.thumbnail,
+      instructorEmail: course.mentorEmail,
+      price: course.price,
+      studentEmail: user?.email,
+      studentName: user?.displayName,
+      studentImage: user?.photoURL,
+      enrollDate: new Date().toISOString(),
+      status: "enrolled",
+    };
+
+    fetch("http://localhost:3000/enroll", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(enrollmentData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setIsEnrolling(false);
+        if (data.insertedId) {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "You have enrolled in this course.",
+            showConfirmButton: false,
+            timer: 2000,
+            background: "#ffffff",
+            iconColor: "#39B8AD",
+          });
+        }
+      })
+      .catch((err) => {
+        setIsEnrolling(false);
+        console.error("Enrollment error:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Failed",
+          text: "Something went wrong. Please try again.",
+        });
+      });
+  };
 
   const relatedCourse = allCourse.filter(
     (c) => c.category === course.category && c._id !== course._id,
@@ -100,8 +152,20 @@ const CourseDetails = () => {
                     </span>
                   </div>
 
-                  <button className="w-full py-4 bg-[#03045e] text-white rounded-2xl font-bold hover:bg-[#00b4d8] transition-all shadow-lg shadow-blue-200">
-                    Get Courses
+                  <button
+                    onClick={handleEnroll}
+                    disabled={isEnrolling}
+                    className={`w-full py-4 text-white rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 group ${
+                      isEnrolling
+                        ? "bg-slate-400 cursor-not-allowed"
+                        : "bg-[#00b4d8] hover:bg-[#03045e] shadow-blue-200"
+                    }`}
+                  >
+                    {isEnrolling ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      "Enroll Course"
+                    )}
                   </button>
 
                   <div className="space-y-4 pt-4 border-t border-slate-50">

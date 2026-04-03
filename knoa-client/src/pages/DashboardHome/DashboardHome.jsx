@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React, { use, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   AreaChart,
@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import { MdOutlineExplore } from "react-icons/md";
 import { AuthContext } from "./../../contexts/AuthContext";
+import { Link } from "react-router";
 
 const data = [
   { name: "Mon", activity: 40 },
@@ -32,6 +33,37 @@ const data = [
 
 const DashboardHome = () => {
   const { user } = use(AuthContext);
+  const [stats, setStats] = useState({ courses: 0, mentors: 0 });
+  const [topMentors, setTopMentors] = useState([]);
+
+  useEffect(() => {
+    const getDashboardData = async () => {
+      // Fetching your existing endpoints
+      const [courseRes, mentorRes] = await Promise.all([
+        fetch("http://localhost:3000/courses"),
+        fetch("http://localhost:3000/mentors"),
+      ]);
+
+      const allCourses = await courseRes.json();
+      const allMentors = await mentorRes.json();
+
+      // 1. Calculate Totals
+      setStats({
+        courses: allCourses.length,
+        mentors: allMentors.length,
+      });
+
+      // 2. Filter High Rated (e.g., Rating > 4.5)
+      const highRated = allMentors
+        .filter((m) => m.rating >= 4.5)
+        .sort((a, b) => b.rating - a.rating) // Highest first
+        .slice(0, 3); // Take top 3
+
+      setTopMentors(highRated);
+    };
+
+    getDashboardData();
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -59,7 +91,7 @@ const DashboardHome = () => {
         <div>
           <h2 className="text-3xl font-black text-[#03045e]">
             Welcome back,{" "}
-            <span className="text-[#39B8AD]">{user?.displayName}!</span>
+            <span className="text-[#00b4d8]">{user?.displayName}!</span>
           </h2>
           <p className="text-gray-500 mt-1 font-medium">
             Monitoring your platform activity and progress.
@@ -78,14 +110,14 @@ const DashboardHome = () => {
         {[
           {
             label: "Active Courses",
-            value: "12",
+            value: stats.courses,
             icon: <FaBookOpen />,
             color: "text-blue-600",
             bg: "bg-blue-50",
           },
           {
             label: "Total Mentors",
-            value: "48",
+            value: stats.mentors,
             icon: <FaUsers />,
             color: "text-purple-600",
             bg: "bg-purple-50",
@@ -173,7 +205,7 @@ const DashboardHome = () => {
                 />
                 <YAxis hide />
                 <Tooltip
-                  cursor={{ stroke: "#39B8AD", strokeWidth: 2 }}
+                  cursor={{ stroke: "#00b4d8", strokeWidth: 2 }}
                   contentStyle={{
                     borderRadius: "16px",
                     border: "none",
@@ -184,7 +216,7 @@ const DashboardHome = () => {
                 <Area
                   type="monotone"
                   dataKey="activity"
-                  stroke="#39B8AD"
+                  stroke="#00b4d8"
                   strokeWidth={4}
                   fillOpacity={1}
                   fill="url(#colorActivity)"
@@ -203,55 +235,75 @@ const DashboardHome = () => {
             Top Mentors
           </h3>
           <div className="space-y-6 flex-1">
-            {[
-              {
-                name: "Dr. Sarah Jonas",
-                role: "UI/UX Designer",
-                img: "https://i.pravatar.cc/150?u=11",
-              },
-              {
-                name: "Mark Wilson",
-                role: "MERN Expert",
-                img: "https://i.pravatar.cc/150?u=12",
-              },
-              {
-                name: "Elena Rose",
-                role: "Cloud Architect",
-                img: "https://i.pravatar.cc/150?u=13",
-              },
-            ].map((m, i) => (
-              <div
-                key={i}
-                className="group flex items-center gap-4 cursor-pointer"
-              >
-                <div className="relative">
-                  <img
-                    src={m.img}
-                    alt=""
-                    className="w-12 h-12 rounded-2xl object-cover ring-4 ring-slate-50 group-hover:ring-[#39B8AD]/20 transition-all"
+            {topMentors.length > 0 ? (
+              topMentors.map((m) => (
+                <Link
+                  to={`/mentor/${m._id}`}
+                  key={m._id}
+                  className="group flex items-center gap-4 cursor-pointer"
+                >
+                  <div className="relative">
+                    <img
+                      /* Use profileImage from DB, fallback to a placeholder if empty */
+                      src={m.profileImage || "https://via.placeholder.com/150"}
+                      alt={m.name}
+                      className="w-12 h-12 rounded-2xl object-cover ring-4 ring-slate-50 group-hover:ring-[#39B8AD]/20 transition-all"
+                    />
+                    {/* Online Status Indicator */}
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-black text-slate-800 group-hover:text-[#39B8AD] transition-colors">
+                      {m.name}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                        {m.expertise || m.role}
+                      </p>
+                      <span className="text-[10px] text-yellow-500 font-bold flex items-center">
+                        ★ {m.rating || "5.0"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <FaArrowRight
+                    className="text-slate-200 group-hover:text-[#39B8AD] group-hover:translate-x-1 transition-all"
+                    size={12}
                   />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-black text-slate-800 group-hover:text-[#39B8AD] transition-colors">
-                    {m.name}
-                  </p>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                    {m.role}
-                  </p>
-                </div>
-                <FaArrowRight
-                  className="text-slate-200 group-hover:text-[#39B8AD] group-hover:translate-x-1 transition-all"
-                  size={12}
-                />
+                </Link>
+              ))
+            ) : (
+              /* Skeleton or Loading State */
+              <div className="space-y-4">
+                {[1, 2, 3].map((n) => (
+                  <div
+                    key={n}
+                    className="flex items-center gap-4 animate-pulse"
+                  >
+                    <div className="w-12 h-12 bg-slate-100 rounded-2xl"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-slate-100 rounded w-1/2"></div>
+                      <div className="h-2 bg-slate-50 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
 
-          <button className="w-full py-4 mt-8 bg-slate-50 hover:bg-[#03045e] hover:text-white text-[#03045e] text-xs font-black uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-2">
-            <MdOutlineExplore size={18} />
-            Explore More
-          </button>
+          <Link to="/mentors" className="block w-full mt-8">
+            <button
+              type="button"
+              className="w-full py-4 bg-[#00b4d8]  hover:bg-[#03045e] hover:text-white text-[#03045e] text-xs font-black uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-2 group"
+            >
+              <MdOutlineExplore
+                size={18}
+                className="group-hover:rotate-12 transition-transform"
+              />
+              Explore More
+            </button>
+          </Link>
         </motion.div>
       </div>
     </motion.div>
