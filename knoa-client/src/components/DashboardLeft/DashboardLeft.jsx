@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React, { use, useState } from "react";
 import { BiSolidBookAdd } from "react-icons/bi";
 import { BsChatDots } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
@@ -7,9 +7,11 @@ import { LuLayoutDashboard } from "react-icons/lu";
 import { RiBookShelfFill } from "react-icons/ri";
 import { Link, NavLink } from "react-router";
 import { AuthContext } from "../../contexts/AuthContext";
+import AIChat from "../AIChat/AIChat";
 
 const DashboardLeft = () => {
   const { logOut } = use(AuthContext);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const menuItems = [
     { name: "Dashboard", path: "/dashboard", icon: <LuLayoutDashboard /> },
@@ -78,7 +80,10 @@ const DashboardLeft = () => {
 
       {/* Bottom Section: Chat & Logout */}
       <div className="flex flex-col gap-2 pt-6 border-t border-blue-50">
-        <button className="flex items-center gap-4 px-4 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all w-full text-left">
+        <button
+          onClick={() => setIsChatOpen(true)}
+          className="flex items-center gap-4 px-4 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all w-full text-left"
+        >
           <span className="text-xl text-blue-500">
             <BsChatDots />
           </span>
@@ -94,6 +99,8 @@ const DashboardLeft = () => {
           </span>
           <span className="font-medium text-lg">Logout</span>
         </button>
+
+        <AIChat isOpen={isChatOpen} setIsOpen={setIsChatOpen} />
       </div>
     </div>
   );

@@ -1,12 +1,10 @@
 import React, { use, useState } from "react";
-import { FcGoogle } from "react-icons/fc";
-import { FiUnlock } from "react-icons/fi";
-import { MdOutlineEmail } from "react-icons/md";
 import { Link, useLocation, useNavigate } from "react-router";
 import { AuthContext } from "../../contexts/AuthContext";
 import { IoEyeOutline } from "react-icons/io5";
 import { VscEyeClosed } from "react-icons/vsc";
 import Swal from "sweetalert2";
+import styled from "styled-components";
 
 const Login = () => {
   const location = useLocation();
@@ -19,125 +17,266 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-
     const email = e.target.email.value;
     const password = e.target.password.value;
 
     signinUser(email, password)
       .then((userCredential) => {
-        // Signed up
         const user = userCredential.user;
-        // show alert
         Swal.fire("Good job!", "User login successfully!", "success");
-
         navigate(`${location.state ? location.state : "/"}`);
-        // reset form
         e.target.reset();
-
         setUser(user);
       })
-      .catch((error) => {
-        setError(error);
+      .catch((err) => {
+        setError(err.message);
       });
   };
 
-  //   google login
   const handleGoogleLogin = () => {
     signinWithGoogle()
       .then((result) => {
-        result.user;
-
+        Swal.fire("Success", "Logged in with Google", "success");
         navigate(`${location.state ? location.state : "/"}`);
-
-        // show alert
-        toast.success("Thank you, You successfully Login", {
-          icon: "🎉",
-          style: {
-            borderRadius: "10px",
-            background: "#034e3b",
-            color: "#fff",
-          },
-        });
       })
-      .catch((error) => {
-        console.log(error);
-        setError(error);
+      .catch((err) => {
+        setError(err.message);
       });
   };
 
   return (
-    <div className="max-w-10/12 mx-auto">
-      <div className=" text-center my-10">
-        <h2 className="font-bold text-4xl text-primary mb-4">Login</h2>
-        <p className="font-medium text-lg text-secondary ">
-          Log in to your account to manage your plants and explore more
-          features.
-        </p>
-      </div>
-
-      <div>
-        <div className="shrink-0  flex flex-col justify-center items-center pb-10">
-          <form onSubmit={handleLogin} className="fieldset gap-5">
-            {/* email  */}
-            <label className="input validator w-96 md:w-[450px]">
-              <MdOutlineEmail />
-              <input type="email" name="email" required placeholder="Email" />
-            </label>
-
-            {/* Password  */}
-            <label className="input validator  w-96  md:w-[450px]">
-              <FiUnlock />
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                required
-                placeholder="password"
-              />
-
-              <span onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <IoEyeOutline /> : <VscEyeClosed />}
-              </span>
-            </label>
-
-            <button type="submit" className="btn btn-primary mt-4">
-              Login
-            </button>
-          </form>
-
-          <div className="flex flex-col gap-6 md:flex-row justify-between items-center md:gap-14 mt-4">
-            <p className="font-medium text-sm text-secondary ">
-              Don't have an account?
-              <Link to={"/auth/register"}>
-                <span className="hover:text-primary pl-2">Register</span>
-              </Link>
-            </p>
-
-            <p className="font-medium text-sm text-secondary ">
-              Forgot your Password?
-            </p>
+    <StyledWrapper>
+      <div className="container">
+        <div className="heading">Sign In</div>
+        <form className="form" onSubmit={handleLogin}>
+          <input
+            placeholder="E-mail"
+            name="email"
+            type="email"
+            className="input"
+            required
+          />
+          <div className="password-wrapper">
+            <input
+              placeholder="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              className="input"
+              required
+            />
+            <span
+              className="eye-icon"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <IoEyeOutline /> : <VscEyeClosed />}
+            </span>
           </div>
 
-          {/* show error  */}
-          <div className="text-center mt-4">
-            {error && (
-              <p className="text-red-800 font-semibold text-sm">{error}</p>
-            )}
-          </div>
+          <span className="forgot-password">
+            <Link to="/auth/forgot">Forgot Password ?</Link>
+          </span>
 
-          <div className="divider my-10 w-1/2 mx-auto">OR</div>
+          {error && <p className="error-text">{error}</p>}
 
-          {/* Google */}
-          <button
-            onClick={handleGoogleLogin}
-            className="btn bg-transparent border-2 text-primary border-primary"
-          >
-            <FcGoogle className="text-xl" />
-            Login with Google
+          <button type="submit" className="login-button">
+            Sign In
           </button>
+        </form>
+
+        <div className="social-account-container">
+          <span className="title">Or Sign in with</span>
+          <div className="social-accounts">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="social-button google"
+            >
+              <svg
+                viewBox="0 0 488 512"
+                height="1.2em"
+                xmlns="http://www.w3.org/2000/svg"
+                className="svg"
+              >
+                <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
+              </svg>
+            </button>
+          </div>
         </div>
+
+        <span className="agreement">
+          Don't have an account? <Link to="/auth/register">Register</Link>
+        </span>
       </div>
-    </div>
+    </StyledWrapper>
   );
 };
+
+const StyledWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+
+  .container {
+    max-width: 400px;
+    width: 100%;
+    background: #f8f9fd;
+    background: linear-gradient(
+      0deg,
+      rgb(255, 255, 255) 0%,
+      rgb(244, 247, 251) 100%
+    );
+    border-radius: 40px;
+    padding: 25px 35px;
+    border: 5px solid rgb(255, 255, 255);
+    box-shadow: rgba(133, 189, 215, 0.878) 0px 30px 30px -20px;
+    margin: 20px;
+  }
+
+  .heading {
+    text-align: center;
+    font-weight: 900;
+    font-size: 30px;
+    color: #1089d3;
+  }
+
+  .form {
+    margin-top: 20px;
+  }
+
+  .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .eye-icon {
+    position: absolute;
+    right: 15px;
+    top: 28px;
+    cursor: pointer;
+    color: #aaa;
+    font-size: 1.2rem;
+  }
+
+  .form .input {
+    width: 100%;
+    background: white;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 20px;
+    margin-top: 15px;
+    box-shadow: #cff0ff 0px 10px 10px -5px;
+    border-inline: 2px solid transparent;
+    font-family: inherit;
+  }
+
+  .form .input:focus {
+    outline: none;
+    border-inline: 2px solid #12b1d1;
+  }
+
+  .error-text {
+    color: #d32f2f;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 600;
+  }
+
+  .form .forgot-password {
+    display: block;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+
+  .form .forgot-password a {
+    font-size: 11px;
+    color: #0099ff;
+    text-decoration: none;
+  }
+
+  .form .login-button {
+    display: block;
+    width: 100%;
+    font-weight: bold;
+    background: linear-gradient(
+      45deg,
+      rgb(16, 137, 211) 0%,
+      rgb(18, 177, 209) 100%
+    );
+    color: white;
+    padding-block: 15px;
+    margin: 20px auto;
+    border-radius: 20px;
+    box-shadow: rgba(133, 189, 215, 0.878) 0px 20px 10px -15px;
+    border: none;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+  }
+
+  .form .login-button:hover {
+    transform: scale(1.03);
+    box-shadow: rgba(133, 189, 215, 0.878) 0px 23px 10px -20px;
+  }
+
+  .social-account-container {
+    margin-top: 25px;
+  }
+
+  .social-account-container .title {
+    display: block;
+    text-align: center;
+    font-size: 10px;
+    color: rgb(170, 170, 170);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .social-account-container .social-accounts {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .social-account-container .social-accounts .social-button {
+    background: white;
+    border: 2px solid #f1f1f1;
+    padding: 10px;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: grid;
+    place-content: center;
+    box-shadow: rgba(133, 189, 215, 0.3) 0px 12px 10px -8px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+  }
+
+  .social-button.google .svg {
+    fill: #4285f4;
+  }
+
+  .social-account-container .social-accounts .social-button:hover {
+    transform: scale(1.1);
+    background: #f8f9fd;
+  }
+
+  .agreement {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    font-size: 12px;
+    color: #777;
+  }
+
+  .agreement a {
+    text-decoration: none;
+    color: #0099ff;
+    font-weight: bold;
+  }
+`;
 
 export default Login;

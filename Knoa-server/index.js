@@ -2,19 +2,18 @@ require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.get("/", (req, res) => {
   res.send("Learning is on!");
 });
-
-// Knoa-Server
-// lLn3xS5UYlJEVpDM
 
 // const uri = "mongodb+srv://<db_username>:<db_password>@cluster0.iz3zu0d.mongodb.net/?appName=Cluster0";
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.iz3zu0d.mongodb.net/?appName=Cluster0`;
@@ -146,6 +145,42 @@ async function run() {
       const query = { role: "mentor" }; // Filter by role
       const result = await userCollection.find(query).toArray();
       res.send(result);
+    });
+
+    // related Mentor
+    app.get("/related-mentors", async (req, res) => {
+      const { expertise, currentId } = req.query;
+      const query = {
+        role: "mentor",
+        expertise: { $regex: expertise, $options: "i" },
+        _id: { $ne: new ObjectId(currentId) },
+      };
+      const related = await userCollection.find(query).limit(3).toArray();
+      res.send(related);
+    });
+
+    // AI chat
+    app.post("/chat", async (req, res) => {
+      const { message } = req.body;
+
+      try {
+        // Choose the model (gemini-1.5-flash is fast and free)
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          systemInstruction:
+            "You are a helpful assistant for an online learning platform. Keep responses concise.",
+        });
+
+        const result = await model.generateContent(message);
+        const response = await result.response;
+        const text = response.text();
+
+        console.log("Gemini says:", text);
+        res.send({ reply: text }); // This matches your frontend 'data.reply'
+      } catch (error) {
+        console.error("Gemini Error:", error);
+        res.status(500).send({ error: "Gemini failed to respond" });
+      }
     });
 
     // Send a ping to confirm a successful connection
