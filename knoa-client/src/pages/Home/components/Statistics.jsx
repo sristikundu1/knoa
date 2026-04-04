@@ -31,7 +31,7 @@ const Statistics = () => {
           {stats.map((stat, index) => (
             <div
               key={index}
-              className={`flex flex-col text-left lg:px-8
+              className={`flex flex-col text-center md:text-left lg:px-8
   ${index !== stats.length - 1 ? "lg:border-r border-blue-200" : ""}
   ${index % 2 === 0 ? "md:border-r border-blue-200" : ""}
 `}

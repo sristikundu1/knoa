@@ -20,6 +20,11 @@ import FavCourses from "./../pages/FavCourses/FavCourses";
 import UpdateProfile from "../pages/UpdateUser/UpdateUser";
 import PrivateRoute from "./../contexts/PrivateRoute";
 import AdminRoute from "../contexts/AdminRoute";
+import Polices from "./../pages/Polices/Polices";
+import MernRoadmap from "./../pages/MernRoadmap/MernRoadmap";
+import InterviewPrep from "../pages/InterviewPrep/InterviewPrep";
+import CertificateVerify from "../pages/Home/CertificateVerify/CertificateVerify";
+import DigitalLibrary from "../pages/Home/DigitalLibrary/DigitalLibrary";
 
 const Routes = createBrowserRouter([
   {
@@ -50,6 +55,26 @@ const Routes = createBrowserRouter([
       {
         path: "faq",
         element: <FAQ></FAQ>,
+      },
+      {
+        path: "/policies",
+        element: <Polices></Polices>,
+      },
+      {
+        path: "/resources/roadmap",
+        element: <MernRoadmap></MernRoadmap>,
+      },
+      {
+        path: "resources/interview-prep",
+        element: <InterviewPrep></InterviewPrep>,
+      },
+      {
+        path: "resources/verify",
+        element: <CertificateVerify></CertificateVerify>,
+      },
+      {
+        path: "resources/community",
+        element: <DigitalLibrary></DigitalLibrary>,
       },
     ],
   },
