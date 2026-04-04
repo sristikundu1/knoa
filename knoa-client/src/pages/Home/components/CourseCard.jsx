@@ -27,12 +27,23 @@ const CourseCard = ({ course }) => {
     e.preventDefault();
     e.stopPropagation(); // Prevents the card click if you have one
 
+    // 1. Prepare the data: Keep the original ID as 'courseId'
+    const wishlistData = {
+      ...course,
+      courseId: course._id, // Save the original ID here!
+      // studentEmail: user?.email, // Best practice: link it to the current user
+      addedAt: new Date().toISOString(),
+    };
+
+    // 2. Remove the MongoDB _id so it doesn't conflict during insertion
+    delete wishlistData._id;
+
     fetch("http://localhost:3000/wishlist", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(courseWithoutId),
+      body: JSON.stringify(wishlistData),
     })
       .then((res) => res.json())
       .then((data) => {

@@ -17,17 +17,20 @@ const AuthProvider = ({ children }) => {
 
   // sign up using email and pass
   const signupUser = (email, password) => {
+    setLoading(true);
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
   // sign in using email and pass
   const signinUser = (email, password) => {
+    setLoading(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
 
   //   google login
   const provider = new GoogleAuthProvider();
   const signinWithGoogle = () => {
+    setLoading(true);
     return signInWithPopup(auth, provider);
   };
 
@@ -52,14 +55,14 @@ const AuthProvider = ({ children }) => {
           const dbData = await res.json();
 
           // Merge Firebase user with MongoDB role
-          setUser({ ...currentUser, role: dbData.role });
+          setUser({ ...currentUser, ...dbData });
         } catch (err) {
           setUser(currentUser);
         }
       } else {
         setUser(null);
       }
-      // setLoading(false);
+      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -72,6 +75,7 @@ const AuthProvider = ({ children }) => {
     updateUser,
     setUser,
     user,
+    loading,
   };
 
   return <AuthContext value={userInfo}>{children}</AuthContext>;

@@ -93,7 +93,7 @@ const FavCourses = () => {
                   </td>
                   <td>
                     <div className="flex justify-center gap-2">
-                      <Link to={`/dashboard/course/${course._id}`}>
+                      <Link to={`/dashboard/course/${course.courseId}`}>
                         <button className="btn btn-ghost btn-sm text-[#03045e]">
                           <HiOutlineEye size={18} />
                         </button>

@@ -17,6 +17,8 @@ import EditCourse from "../pages/EditCourse/EditCourse";
 import Contact from "../pages/Contact/Contact";
 import FAQ from "../pages/FAQ/FAQ";
 import FavCourses from "./../pages/FavCourses/FavCourses";
+import UpdateProfile from "../pages/UpdateUser/UpdateUser";
+import PrivateRoute from "./../contexts/PrivateRoute";
 
 const Routes = createBrowserRouter([
   {
@@ -66,7 +68,11 @@ const Routes = createBrowserRouter([
   },
   {
     path: "dashboard",
-    element: <DashboardLayout />,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     id: "dashboard-data",
     loader: () => fetch("http://localhost:3000/wishlist"),
     children: [
@@ -102,6 +108,10 @@ const Routes = createBrowserRouter([
       {
         path: "/dashboard/profile",
         element: <Profile></Profile>,
+      },
+      {
+        path: "/dashboard/update-profile",
+        element: <UpdateProfile></UpdateProfile>,
       },
     ],
   },

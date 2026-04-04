@@ -261,8 +261,6 @@ const Register = () => {
   );
 };
 
-// ... (StyledWrapper remains exactly as you provided) ...
-
 const StyledWrapper = styled.div`
   .container {
     max-width: 450px; /* Adjusted for better form fit */

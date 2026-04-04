@@ -88,9 +88,12 @@ const Profile = () => {
                 Official {user?.role || "Member"}
               </p>
             </div>
-            <button className="mb-4 px-8 py-3 bg-[#03045e] text-white rounded-2xl font-bold text-sm hover:bg-[#39B8AD] transition-all shadow-lg shadow-blue-900/10">
+            <Link
+              to="/dashboard/update-profile"
+              className="mb-4 px-8 py-3 bg-[#03045e] text-white rounded-2xl font-bold text-sm hover:bg-[#00b4d8] transition-all shadow-lg shadow-blue-900/10 inline-block"
+            >
               Edit Details
-            </button>
+            </Link>
           </div>
 
           {/* --- Information Grid --- */}
@@ -117,7 +120,7 @@ const Profile = () => {
                 Phone
               </p>
               <p className="text-slate-700 font-bold">
-                {user?.phoneNumber || "Not Provided"}
+                {user?.phone || "Not Provided"}
               </p>
             </div>
 

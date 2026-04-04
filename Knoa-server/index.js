@@ -134,6 +134,22 @@ async function run() {
       res.send(result);
     });
 
+    // update user info
+    app.patch("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const updatedInfo = req.body;
+      // Remove sensitive fields if they exist in the body
+      delete updatedInfo._id;
+      delete updatedInfo.email;
+
+      const filter = { email: email };
+      const updateDoc = {
+        $set: updatedInfo,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // mentor API handle
     // Get a single mentor's details by their ID
     app.get("/users/mentor/:id", async (req, res) => {
@@ -214,10 +230,10 @@ async function run() {
 
     // for mentor profile
     app.get("/courses-by-mentor", async (req, res) => {
-      const email = req.query.email;
+      const name = req.query.name;
 
       // We search the main courseCollection for courses this mentor created
-      const query = { mentorEmail: email };
+      const query = { mentorName: name };
       const result = await courseCollection.find(query).toArray();
       res.send(result);
     });
