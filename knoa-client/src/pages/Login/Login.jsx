@@ -10,10 +10,12 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { signinUser, setUser, signinWithGoogle } = use(AuthContext);
+  const { signinUser, setUser, signinWithGoogle, logOut, forgetPass } =
+    use(AuthContext);
 
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -23,6 +25,25 @@ const Login = () => {
     signinUser(email, password)
       .then((userCredential) => {
         const user = userCredential.user;
+        // Check email verification
+        if (!user.emailVerified) {
+          Swal.fire({
+            title: "Email Not Verified",
+            text: "Please verify your email.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Resend Email",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              sendEmailVerification(user);
+            }
+          });
+
+          //  force logout
+          logOut();
+
+          return;
+        }
         Swal.fire("Good job!", "User login successfully!", "success");
         navigate(`${location.state ? location.state : "/"}`);
         e.target.reset();
@@ -44,6 +65,24 @@ const Login = () => {
       });
   };
 
+  const handleForgotPassword = (email) => {
+    if (!email) {
+      return Swal.fire("Error", "Please enter your email first", "error");
+    }
+
+    forgetPass(email)
+      .then(() => {
+        Swal.fire(
+          "Check Your Email",
+          "Password reset link has been sent.",
+          "success",
+        );
+      })
+      .catch((error) => {
+        Swal.fire("Error", error.message, "error");
+      });
+  };
+
   return (
     <StyledWrapper>
       <div className="container">
@@ -55,6 +94,7 @@ const Login = () => {
             type="email"
             className="input"
             required
+            onChange={(e) => setEmail(e.target.value)}
           />
           <div className="password-wrapper">
             <input
@@ -72,9 +112,13 @@ const Login = () => {
             </span>
           </div>
 
-          <span className="forgot-password">
-            <Link to="/auth/forgot">Forgot Password ?</Link>
-          </span>
+          <p
+            className="forgot-password"
+            style={{ cursor: "pointer" }}
+            onClick={() => handleForgotPassword(email)}
+          >
+            Forgot Password ?
+          </p>
 
           {error && <p className="error-text">{error}</p>}
 

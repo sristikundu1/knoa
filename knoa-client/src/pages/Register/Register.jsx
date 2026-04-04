@@ -13,8 +13,24 @@ const Register = () => {
 
   // FIXED: Added state to store Step 1 data so Step 2 can access it
   const [step1Data, setStep1Data] = useState({});
+  const [password, setPassword] = useState("");
 
   const { signupUser, updateUser } = use(AuthContext);
+
+  const validatePassword = (value) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (!regex.test(value)) {
+      Swal.fire(
+        "Error",
+        "Password must be 8+ chars, include uppercase, lowercase, number, and special character.",
+        "error",
+      );
+      return false;
+    }
+
+    return true;
+  };
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -22,7 +38,7 @@ const Register = () => {
     const data = new FormData(form);
     const dataObj = Object.fromEntries(data.entries());
 
-    // Save Step 1 data to state so we can use it in Step 2's hidden fields
+    // ✅ include password
     setStep1Data(dataObj);
 
     if (dataObj.role === "mentor") {
@@ -36,7 +52,6 @@ const Register = () => {
     const formData = new FormData(formElement);
     const dataObj = Object.fromEntries(formData.entries());
 
-    // 1. Destructure to get the adminCode field from your form
     const {
       email,
       password,
@@ -46,8 +61,6 @@ const Register = () => {
       ...restProfileData
     } = dataObj;
 
-    // 2. Secret Logic: If they checked the box AND typed the correct code, they become Admin
-    // Replace "KnoaAdmin2026" with whatever secret password you want
     let finalRole = selectedRole;
     if (isAdminAttempt && adminCode === "KnoaAdmin2026") {
       finalRole = "admin";
@@ -55,26 +68,38 @@ const Register = () => {
 
     signupUser(email, password)
       .then((result) => {
-        // Update Firebase Profile
+        const user = result.user;
+
+        // Send verification email
+        return sendEmailVerification(user).then(() => {
+          Swal.fire(
+            "Verify Your Email",
+            "A verification email has been sent. Please check your inbox.",
+            "info",
+          );
+          return result;
+        });
+      })
+      .then((result) => {
+        //  Update profile
         return updateUser({
           displayName: name,
           photoURL: profileImage,
         }).then(() => result);
       })
       .then((result) => {
-        // 3. Prepare the object for MongoDB using 'finalRole'
         const userInfo = {
           email,
           name,
           profileImage,
           ...restProfileData,
-          role: finalRole, // This is now dynamic (admin, mentor, or student)
+          role: finalRole,
           rating: restProfileData.rating || (finalRole === "mentor" ? 5 : 0),
           creationTime: result.user?.metadata.creationTime,
           uid: result.user?.uid,
+          emailVerified: false, // 🔥 optional but recommended
         };
 
-        // Send to MongoDB
         return fetch("http://localhost:3000/users", {
           method: "POST",
           headers: {
@@ -86,11 +111,16 @@ const Register = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.insertedId) {
-          Swal.fire("Good job!", "Account created successfully!", "success");
+          Swal.fire(
+            "Account Created",
+            "Please verify your email before logging in.",
+            "success",
+          );
+
           setStep(1);
           formElement.reset();
           setStep1Data({});
-          setIsAdminAttempt(false); // Reset the admin checkbox state
+          setIsAdminAttempt(false);
         }
       })
       .catch((error) => {
@@ -193,8 +223,13 @@ const Register = () => {
                 type="password"
                 name="password"
                 placeholder="Password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
-
+              {password && !validatePassword(password) && (
+                <p style={{ color: "red", fontSize: "12px" }}>Weak password</p>
+              )}
               <span className="login-link">
                 Already have an account? <Link to={"/auth/login"}>Login</Link>
               </span>
