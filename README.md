@@ -1,7 +1,7 @@
 🎓 Knoa | Modern Learning Management System
 Knoa is a comprehensive, AI-integrated MERN stack platform designed to bridge the gap between expert mentors and aspiring developers. Featuring robust role-based access control, secure authentication, and a sleek, eye-soothing UI.
 
-Live Site URL: https://knoa-learning.web.app (Replace with your actual Firebase/Vercel URL)
+Live Site URL: https://knoa-d9d9c.web.app/ (Replace with your actual Firebase/Vercel URL)
 
 🚀 Key Features
 🔐 Authentication & Security
