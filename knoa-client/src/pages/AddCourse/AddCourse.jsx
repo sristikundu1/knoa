@@ -25,7 +25,7 @@ const AddCourse = () => {
 
   // Fetch mentors from database on component mount
   useEffect(() => {
-    fetch("http://localhost:3000/mentors")
+    fetch("https://knoa-server.vercel.app/mentors")
       .then((res) => res.json())
       .then((data) => setMentors(data))
       .catch((err) => console.error("Error fetching mentors:", err));
@@ -49,7 +49,7 @@ const AddCourse = () => {
 
     // console.log(courseData);
 
-    fetch("http://localhost:3000/courses", {
+    fetch("https://knoa-server.vercel.app/courses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

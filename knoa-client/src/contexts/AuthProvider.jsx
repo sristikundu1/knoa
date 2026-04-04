@@ -55,7 +55,7 @@ const AuthProvider = ({ children }) => {
         // Fetch the role from your MongoDB
         try {
           const res = await fetch(
-            `http://localhost:3000/users/${currentUser.email}`,
+            `https://knoa-server.vercel.app/users/${currentUser.email}`,
           );
           const dbData = await res.json();
 

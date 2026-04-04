@@ -18,7 +18,7 @@ const CourseDetails = () => {
   const [isEnrolling, setIsEnrolling] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:3000/courses")
+    fetch("https://knoa-server.vercel.app/courses")
       .then((res) => res.json())
       .then((data) => setAllCourse(data));
   }, []);
@@ -40,7 +40,7 @@ const CourseDetails = () => {
       status: "enrolled",
     };
 
-    fetch("http://localhost:3000/enroll", {
+    fetch("https://knoa-server.vercel.app/enroll", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(enrollmentData),

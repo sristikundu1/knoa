@@ -35,18 +35,18 @@ const Routes = createBrowserRouter([
       {
         index: true,
         element: <Home></Home>,
-        loader: () => fetch("http://localhost:3000/courses"),
+        loader: () => fetch("https://knoa-server.vercel.app/courses"),
       },
       {
         path: "mentors",
         element: <Mentors></Mentors>,
-        loader: () => fetch("http://localhost:3000/mentors"),
+        loader: () => fetch("https://knoa-server.vercel.app/mentors"),
       },
       {
         path: "mentor/:id",
         element: <MentorDetails></MentorDetails>,
         loader: ({ params }) =>
-          fetch(`http://localhost:3000/users/mentor/${params.id}`),
+          fetch(`https://knoa-server.vercel.app/users/mentor/${params.id}`),
       },
       {
         path: "contact",
@@ -100,7 +100,7 @@ const Routes = createBrowserRouter([
       </PrivateRoute>
     ),
     id: "dashboard-data",
-    loader: () => fetch("http://localhost:3000/wishlist"),
+    loader: () => fetch("https://knoa-server.vercel.app/wishlist"),
     children: [
       {
         index: true,
@@ -117,19 +117,19 @@ const Routes = createBrowserRouter([
       {
         path: "/dashboard/all-courses",
         element: <Courses></Courses>,
-        loader: () => fetch("http://localhost:3000/courses"),
+        loader: () => fetch("https://knoa-server.vercel.app/courses"),
       },
       {
         path: "course/:id",
         element: <CourseDetails></CourseDetails>,
         loader: ({ params }) =>
-          fetch(`http://localhost:3000/course/${params.id}`),
+          fetch(`https://knoa-server.vercel.app/course/${params.id}`),
       },
       {
         path: "edit-course/:id",
         element: <EditCourse></EditCourse>,
         loader: ({ params }) =>
-          fetch(`http://localhost:3000/course/${params.id}`),
+          fetch(`https://knoa-server.vercel.app/course/${params.id}`),
       },
       {
         path: "wishlist",

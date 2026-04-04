@@ -21,7 +21,7 @@ const NewsletterSection = () => {
     };
 
     // --- Dynamic Backend Integration ---
-    fetch("http://localhost:3000/subscribers", {
+    fetch("https://knoa-server.vercel.app/subscribers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(subscriberData),

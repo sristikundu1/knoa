@@ -22,7 +22,7 @@ const CourseCard = ({ course, setCourses, courses }) => {
       if (result.isConfirmed)
         // delete data from ui
 
-        fetch(`http://localhost:3000/course/${_id}`, {
+        fetch(`https://knoa-server.vercel.app/course/${_id}`, {
           method: "DELETE",
         })
           .then((res) => res.json())

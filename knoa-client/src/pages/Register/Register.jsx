@@ -100,7 +100,7 @@ const Register = () => {
           emailVerified: false, // 🔥 optional but recommended
         };
 
-        return fetch("http://localhost:3000/users", {
+        return fetch("https://knoa-server.vercel.app/users", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -21,7 +21,7 @@ const UpdateProfile = () => {
     })
       .then(() => {
         // 2. Update MongoDB
-        return fetch(`http://localhost:3000/users/${user.email}`, {
+        return fetch(`https://knoa-server.vercel.app/users/${user.email}`, {
           method: "PATCH", // Or PUT
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedData),

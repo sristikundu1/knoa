@@ -12,7 +12,7 @@ const RelatedMentors = ({ mentor }) => {
     // Only fetch if we have expertise data
     if (mentor?.expertise) {
       fetch(
-        `http://localhost:3000/related-mentors?expertise=${mentor.expertise}&excludeId=${mentor._id}`,
+        `https://knoa-server.vercel.app/related-mentors?expertise=${mentor.expertise}&excludeId=${mentor._id}`,
       )
         .then((res) => res.json())
         .then((data) => setRelatedMentors(data))

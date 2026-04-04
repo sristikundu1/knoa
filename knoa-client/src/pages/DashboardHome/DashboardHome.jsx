@@ -40,8 +40,8 @@ const DashboardHome = () => {
     const getDashboardData = async () => {
       // Fetching your existing endpoints
       const [courseRes, mentorRes] = await Promise.all([
-        fetch("http://localhost:3000/courses"),
-        fetch("http://localhost:3000/mentors"),
+        fetch("https://knoa-server.vercel.app/courses"),
+        fetch("https://knoa-server.vercel.app/mentors"),
       ]);
 
       const allCourses = await courseRes.json();

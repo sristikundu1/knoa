@@ -38,7 +38,7 @@ const CourseCard = ({ course }) => {
     // 2. Remove the MongoDB _id so it doesn't conflict during insertion
     delete wishlistData._id;
 
-    fetch("http://localhost:3000/wishlist", {
+    fetch("https://knoa-server.vercel.app/wishlist", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

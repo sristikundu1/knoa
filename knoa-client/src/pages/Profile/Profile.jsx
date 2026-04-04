@@ -20,8 +20,8 @@ const Profile = () => {
     if (user?.email) {
       const endpoint =
         user?.role === "mentor"
-          ? `http://localhost:3000/courses-by-mentor?email=${user.email}`
-          : `http://localhost:3000/my-enrolled-courses?email=${user.email}`;
+          ? `https://knoa-server.vercel.app/courses-by-mentor?email=${user.email}`
+          : `https://knoa-server.vercel.app/my-enrolled-courses?email=${user.email}`;
 
       fetch(endpoint)
         .then((res) => {
