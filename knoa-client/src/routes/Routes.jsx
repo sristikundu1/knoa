@@ -19,6 +19,7 @@ import FAQ from "../pages/FAQ/FAQ";
 import FavCourses from "./../pages/FavCourses/FavCourses";
 import UpdateProfile from "../pages/UpdateUser/UpdateUser";
 import PrivateRoute from "./../contexts/PrivateRoute";
+import AdminRoute from "../contexts/AdminRoute";
 
 const Routes = createBrowserRouter([
   {
@@ -82,7 +83,11 @@ const Routes = createBrowserRouter([
       },
       {
         path: "/dashboard/add-course",
-        element: <AddCourse></AddCourse>,
+        element: (
+          <AdminRoute>
+            <AddCourse></AddCourse>
+          </AdminRoute>
+        ),
       },
       {
         path: "/dashboard/all-courses",

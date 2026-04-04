@@ -100,7 +100,7 @@ const Profile = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-2">
             <div className="group p-6 rounded-2xl bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
               <FaEnvelope
-                className="text-slate-300 group-hover:text-[#39B8AD] mb-3 transition-colors"
+                className="text-slate-300 group-hover:text-[#00b4d8] mb-3 transition-colors"
                 size={20}
               />
               <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
@@ -113,7 +113,7 @@ const Profile = () => {
 
             <div className="group p-6 rounded-2xl bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
               <FaPhone
-                className="text-slate-300 group-hover:text-[#39B8AD] mb-3 transition-colors"
+                className="text-slate-300 group-hover:text-[#00b4d8] mb-3 transition-colors"
                 size={20}
               />
               <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
@@ -126,7 +126,7 @@ const Profile = () => {
 
             <div className="group p-6 rounded-2xl bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
               <FaMapMarkerAlt
-                className="text-slate-300 group-hover:text-[#39B8AD] mb-3 transition-colors"
+                className="text-slate-300 group-hover:text-[#00b4d8] mb-3 transition-colors"
                 size={20}
               />
               <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
@@ -170,7 +170,7 @@ const Profile = () => {
                     {course.courseName || course.name}
                   </h4>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-lg font-black text-[#39B8AD]">
+                    <span className="text-lg font-black text-[#00b4d8]">
                       ${course.price}
                     </span>
                     <Link

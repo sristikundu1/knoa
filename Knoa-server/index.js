@@ -43,6 +43,7 @@ async function run() {
     const enrollmentCollection = client
       .db("KnoaDB")
       .collection("enrolledCourse");
+    const subscriberCollection = client.db("KnoaDB").collection("subscribers");
 
     // get the data from database
     app.get("/courses", async (req, res) => {
@@ -235,6 +236,27 @@ async function run() {
       // We search the main courseCollection for courses this mentor created
       const query = { mentorName: name };
       const result = await courseCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // API for newsletter subscribers
+    // Inside your server connection block
+
+    app.post("/subscribers", async (req, res) => {
+      const subscriber = req.body;
+
+      // 1. Check if the email is already in the database
+      const query = { email: subscriber.email };
+      const alreadySubscribed = await subscriberCollection.findOne(query);
+
+      if (alreadySubscribed) {
+        return res
+          .status(400)
+          .send({ message: "This email is already subscribed!" });
+      }
+
+      // 2. Insert the new dynamic subscriber data
+      const result = await subscriberCollection.insertOne(subscriber);
       res.send(result);
     });
 

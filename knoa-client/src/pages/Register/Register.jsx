@@ -4,10 +4,12 @@ import { FcGoogle } from "react-icons/fc";
 import Swal from "sweetalert2";
 import { Link } from "react-router";
 import { AuthContext } from "../../contexts/AuthContext";
+import { motion } from "framer-motion";
 
 const Register = () => {
   const [step, setStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState("student");
+  const [isAdminAttempt, setIsAdminAttempt] = useState(false);
 
   // FIXED: Added state to store Step 1 data so Step 2 can access it
   const [step1Data, setStep1Data] = useState({});
@@ -34,31 +36,45 @@ const Register = () => {
     const formData = new FormData(formElement);
     const dataObj = Object.fromEntries(formData.entries());
 
-    // Destructure specifically to get name and profileImage for the update
-    const { email, password, name, profileImage, ...restProfileData } = dataObj;
+    // 1. Destructure to get the adminCode field from your form
+    const {
+      email,
+      password,
+      name,
+      profileImage,
+      adminCode,
+      ...restProfileData
+    } = dataObj;
+
+    // 2. Secret Logic: If they checked the box AND typed the correct code, they become Admin
+    // Replace "KnoaAdmin2026" with whatever secret password you want
+    let finalRole = selectedRole;
+    if (isAdminAttempt && adminCode === "KnoaAdmin2026") {
+      finalRole = "admin";
+    }
 
     signupUser(email, password)
       .then((result) => {
-        // 1. Update Firebase Profile so Navbar can see the name and image
+        // Update Firebase Profile
         return updateUser({
           displayName: name,
           photoURL: profileImage,
-        }).then(() => result); // Pass the result forward to the next .then
+        }).then(() => result);
       })
       .then((result) => {
-        // 2. Prepare the object for MongoDB
+        // 3. Prepare the object for MongoDB using 'finalRole'
         const userInfo = {
           email,
-          name, // include name explicitly
-          profileImage, // include image explicitly
+          name,
+          profileImage,
           ...restProfileData,
-          role: selectedRole,
-          rating: restProfileData.rating || (selectedRole === "mentor" ? 5 : 0),
+          role: finalRole, // This is now dynamic (admin, mentor, or student)
+          rating: restProfileData.rating || (finalRole === "mentor" ? 5 : 0),
           creationTime: result.user?.metadata.creationTime,
-          uid: result.user?.uid, // used for linking DB and Auth
+          uid: result.user?.uid,
         };
 
-        // 3. Send to MongoDB
+        // Send to MongoDB
         return fetch("http://localhost:3000/users", {
           method: "POST",
           headers: {
@@ -70,10 +86,11 @@ const Register = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.insertedId) {
-          Swal.fire("Good job!", "User added successfully!", "success");
+          Swal.fire("Good job!", "Account created successfully!", "success");
           setStep(1);
           formElement.reset();
           setStep1Data({});
+          setIsAdminAttempt(false); // Reset the admin checkbox state
         }
       })
       .catch((error) => {
@@ -136,6 +153,39 @@ const Register = () => {
                 <option value="student">I am a Student</option>
                 <option value="mentor">I am a Mentor</option>
               </select>
+
+              {/* --- Admin Toggle Section --- */}
+              <div className="flex flex-col gap-2 p-3 mt-4 rounded-2xl bg-[#39b8ad]/5 border border-dashed border-[#39b8ad]/30">
+                <label className="flex items-center gap-2 cursor-pointer transition-all hover:opacity-80">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-xs checkbox-primary"
+                    onChange={(e) => setIsAdminAttempt(e.target.checked)}
+                  />
+                  <span className="text-[11px] font-bold text-[#03045e] uppercase tracking-wider">
+                    Apply as Administrator?
+                  </span>
+                </label>
+
+                {/* Only show this if checkbox is checked */}
+                {isAdminAttempt && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    className="overflow-hidden"
+                  >
+                    <input
+                      className="input !mt-2 !border-[#39b8ad] !shadow-none"
+                      type="password"
+                      name="adminCode"
+                      placeholder="Enter Secret Admin Key"
+                    />
+                    <p className="text-[9px] text-slate-400 mt-1 ml-2 italic">
+                      *Verification code required for administrative privileges.
+                    </p>
+                  </motion.div>
+                )}
+              </div>
 
               <input
                 required
