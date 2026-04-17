@@ -74,38 +74,54 @@ const Navbar = () => {
         {/* Navbar End: User Profile or Login */}
         <div className="navbar-end gap-2 md:gap-4">
           {user ? (
-            <div className="flex items-center gap-2 md:gap-4 p-1 pr-2 md:pr-4 bg-slate-50 rounded-full border border-slate-100">
-              <div className="relative shrink-0">
-                <img
-                  className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-white ring-1 ring-[#39b8ad]/20 shadow-sm"
-                  src={
-                    user?.photoURL ||
-                    "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                  }
-                  alt="Profile"
-                />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
-              </div>
-
-              {/* Hide name on very small screens to save space */}
-              <div className="hidden sm:block">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter leading-none">
-                  User
-                </p>
-                <p className="text-xs md:text-sm font-bold text-[#03045e] truncate max-w-[80px]">
-                  {user?.displayName?.split(" ")[0]}
-                </p>
-              </div>
-
-              <button
-                onClick={handleLogOut}
-                className="p-1.5 md:p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+            <div className="dropdown dropdown-end">
+              {/* The Trigger: This is what you click to open the menu */}
+              <div
+                tabIndex={0}
+                role="button"
+                className="flex items-center gap-2 p-1 pr-2 bg-slate-50 rounded-full border border-slate-100 hover:bg-slate-100 transition-all"
               >
-                <HiOutlineLogout
-                  size={18}
-                  className="md:w-[22px] md:h-[22px]"
-                />
-              </button>
+                <div className="relative shrink-0">
+                  <img
+                    className="w-10 h-10 rounded-full object-cover border-2 border-white ring-1 ring-[#39b8ad]/20 shadow-sm"
+                    src={
+                      user?.photoURL ||
+                      "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                    }
+                    alt="Profile"
+                  />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
+                </div>
+              </div>
+
+              {/* The Content: This shows up when the image is clicked */}
+              <ul
+                tabIndex={0}
+                className="dropdown-content z-[1] menu p-2 shadow-xl bg-base-100 rounded-box w-52 mt-4 border border-slate-100"
+              >
+                <div className="px-4 py-3 border-b border-slate-50 mb-2">
+                  <p className="text-sm font-bold text-[#03045e] truncate">
+                    {user?.displayName?.split(" ")[0]}
+                  </p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                    {user?.role || "Student"}
+                  </p>
+                </div>
+                <li>
+                  <a className="py-2">Profile Settings</a>
+                </li>
+                <div className="divider my-0"></div>{" "}
+                {/* Simple DaisyUI divider line */}
+                <li>
+                  <button
+                    onClick={handleLogOut}
+                    className="text-red-500 hover:bg-red-50 flex items-center gap-2 py-3"
+                  >
+                    <HiOutlineLogout size={18} />
+                    Logout
+                  </button>
+                </li>
+              </ul>
             </div>
           ) : (
             <Link to="/auth/register">
