@@ -7,7 +7,7 @@ import { LuUsers } from "react-icons/lu";
 import { BiSolidBookAdd } from "react-icons/bi";
 import useAuth from "../hooks/UseAuth";
 import { HiOutlineLogout } from "react-icons/hi";
-import { FaUserCog } from "react-icons/fa";
+import { FaUserCog, FaUserGraduate } from "react-icons/fa";
 import { HiOutlineCheckBadge } from "react-icons/hi2";
 
 const Dashboard = () => {
@@ -90,18 +90,32 @@ const Dashboard = () => {
             )}
 
             {role === "admin" && (
-              <li>
-                <Link
-                  to={"/dashboard/manage-user"}
-                  className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                  data-tip="Manage User"
-                >
-                  <LuUsers size={20} />
-                  <span className="text-sm font-medium is-drawer-close:hidden">
-                    Manage User
-                  </span>
-                </Link>
-              </li>
+              <>
+                <li>
+                  <Link
+                    to={"/dashboard/manage-user"}
+                    className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Manage User"
+                  >
+                    <LuUsers size={20} />
+                    <span className="text-sm font-medium is-drawer-close:hidden">
+                      Manage User
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to={"/dashboard/manage-enrollment"}
+                    className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Manage Enrollment"
+                  >
+                    <FaUserGraduate size={20} />
+                    <span className="text-sm font-medium is-drawer-close:hidden">
+                      Manage Enrollment
+                    </span>
+                  </Link>
+                </li>
+              </>
             )}
 
             {(role === "admin" || role === "mentor") && (

@@ -389,6 +389,46 @@ async function run() {
 
     // Payment related API
 
+    // STUDENT ROUTE: Get only my courses
+    app.get("/my-enrollments/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await enrollmentCollection
+        .find({ studentEmail: email })
+        .toArray();
+      res.send(result);
+    });
+
+    // MENTOR ROUTE: Get students for my courses specifically
+    app.get("/mentor/enrollments/:uid", async (req, res) => {
+      const uid = req.params.uid; // Matches the "qQsvCTx..." UID
+      const result = await enrollmentCollection
+        .find({ instructorId: uid })
+        .toArray();
+      res.send(result);
+    });
+
+    // ADMIN ROUTE : get everything for  management
+    app.get("/admin/enrollments", async (req, res) => {
+      const result = await enrollmentCollection.find().toArray();
+      res.send(result);
+    });
+
+    // ADMIN ACTION: Accept or Reject
+    app.patch("/enrollments/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const { status } = req.body;
+
+      const updatedDoc = {
+        $set: {
+          status: status,
+        },
+      };
+
+      const result = await enrollmentCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
     app.post("/verify-payment", async (req, res) => {
       const sessionId = req.body.sessionId;
       if (!sessionId) return res.status(400).send({ message: "No session ID" });
