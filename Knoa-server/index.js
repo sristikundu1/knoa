@@ -3,8 +3,9 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-
 const app = express();
+
+const stripe = require("stripe")(process.env.STRIPE_SECRETE);
 const port = process.env.PORT || 3000;
 
 app.use(cors());
@@ -14,9 +15,6 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 app.get("/", (req, res) => {
   res.send("Learning is on!");
 });
-
-// const uri = "mongodb+srv://<db_username>:<db_password>@cluster0.iz3zu0d.mongodb.net/?appName=Cluster0";
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.iz3zu0d.mongodb.net/?appName=Cluster0`;
 
 const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ac-pr6dsoo-shard-00-00.iz3zu0d.mongodb.net:27017,ac-pr6dsoo-shard-00-01.iz3zu0d.mongodb.net:27017,ac-pr6dsoo-shard-00-02.iz3zu0d.mongodb.net:27017/?ssl=true&replicaSet=atlas-1026ed-shard-0&authSource=admin&appName=Cluster0`;
 
@@ -37,13 +35,115 @@ async function run() {
     // create the colletion in DB
     const courseCollection = client.db("KnoaDB").collection("courses");
     const userCollection = client.db("KnoaDB").collection("users");
+    const mentorCollection = client.db("KnoaDB").collection("mentors");
+    const enrollmentCollection = client.db("KnoaDB").collection("enrollment");
     const FAvCourseCollection = client
       .db("KnoaDB")
       .collection("wishlistCourse");
-    const enrollmentCollection = client
-      .db("KnoaDB")
-      .collection("enrolledCourse");
+    // const enrollmentCollection = client
+    //   .db("KnoaDB")
+    //   .collection("enrolledCourse");
     const subscriberCollection = client.db("KnoaDB").collection("subscribers");
+
+    // API for user
+    // get all the user data from database
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get the user role from database
+    app.get("/users/role/:email", async (req, res) => {
+      const email = req.params.email;
+
+      const user = await userCollection.findOne({ email });
+
+      if (!user) {
+        return res.send({ role: "student" }); // fallback
+      }
+
+      res.send({ role: user.role });
+    });
+
+    //  post the user info in the database
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+
+      // Logic to check if user email is already present
+      const isExist = await userCollection.findOne(query);
+
+      if (isExist) {
+        return res.send({ message: "user already exists", insertedId: null });
+      }
+
+      const newUser = {
+        ...user,
+        role: "student", //default user role
+      };
+
+      const result = await userCollection.insertOne(newUser);
+      res.send(result);
+    });
+
+    // update user role in db
+    app.patch("/users/role/:id", async (req, res) => {
+      const id = req.params.id;
+      const { role } = req.body;
+      const filter = { _id: new ObjectId(id) };
+
+      const updatedDoc = {
+        $set: {
+          role: role,
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    // delete user from db
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // mentors API
+
+    // get the data from database
+    app.get("/mentors", async (req, res) => {
+      const result = await mentorCollection.find().toArray();
+      res.send(result);
+    });
+
+    // insert mentor data if exist then update mentor data
+    app.post("/mentors", async (req, res) => {
+      mentorData = req.body;
+
+      const query = { email: mentorData.email };
+
+      const updatedDoc = {
+        $set: {
+          ...mentorData,
+          updatedAt: new Date(),
+        },
+      };
+
+      // If user exists, update them. If not, create them.
+      const options = { upsert: true };
+
+      const result = await mentorCollection.updateOne(
+        query,
+        updatedDoc,
+        options,
+      );
+      res.send(result);
+    });
+
+    // course API
 
     // get the data from database
     app.get("/courses", async (req, res) => {
@@ -54,8 +154,26 @@ async function run() {
     app.get("/course/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await courseCollection.findOne(query);
-      res.send(result);
+
+      // 1. Fetch the main course details
+      const course = await courseCollection.findOne(query);
+
+      if (!course) {
+        return res.status(404).send({ message: "course not found !" });
+      }
+
+      // fetch same category course
+      const relatedQuery = {
+        category: course.category,
+        _id: { $ne: new ObjectId(id) },
+      };
+
+      const relatedCourses = await courseCollection
+        .find(relatedQuery)
+        .limit(3)
+        .toArray();
+
+      res.send({ course, relatedCourses });
     });
 
     //  post the data in the database
@@ -66,19 +184,18 @@ async function run() {
     });
 
     // update course details
-    app.put("/course/:id", async (req, res) => {
+    app.patch("/course/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updatedCourse = req.body;
+
+      // Create a copy of the body and remove _id if it exists
+      const updatedCourse = { ...req.body };
+      delete updatedCourse._id;
+
       const updateDoc = {
         $set: updatedCourse,
       };
-      const result = await courseCollection.updateOne(
-        filter,
-        updateDoc,
-        options,
-      );
+      const result = await courseCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
@@ -114,26 +231,12 @@ async function run() {
       res.send(result);
     });
 
-    // API for user
-    // get all the user data from database
-    app.get("/users", async (req, res) => {
-      const result = await userCollection.find().toArray();
-      res.send(result);
-    });
-
     // get the user data according to email from database
-    app.get("/users/:email", async (req, res) => {
-      const email = req.params.email;
-      const user = await userCollection.findOne({ email: email });
-      res.send(user);
-    });
-
-    //  post the data in the database
-    app.post("/users", async (req, res) => {
-      const usersProfile = req.body;
-      const result = await userCollection.insertOne(usersProfile);
-      res.send(result);
-    });
+    // app.get("/users/:email", async (req, res) => {
+    //   const email = req.params.email;
+    //   const user = await userCollection.findOne({ email: email });
+    //   res.send(user);
+    // });
 
     // update user info
     app.patch("/users/:email", async (req, res) => {
@@ -162,8 +265,8 @@ async function run() {
 
     // Get ONLY users who are mentors (for your Mentors Page)
     app.get("/mentors", async (req, res) => {
-      const query = { role: "mentor" }; // Filter by role
-      const result = await userCollection.find(query).toArray();
+      // const query = { role: "mentor" }; // Filter by role
+      const result = await mentorCollection.find().toArray();
       res.send(result);
     });
 
@@ -282,6 +385,86 @@ async function run() {
         console.error("Gemini Error:", error);
         res.status(500).send({ error: "Gemini failed to respond" });
       }
+    });
+
+    // Payment related API
+
+    app.post("/verify-payment", async (req, res) => {
+      const sessionId = req.body.sessionId;
+      if (!sessionId) return res.status(400).send({ message: "No session ID" });
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+      console.log("session", session);
+      if (session.payment_status === "paid") {
+        const { courseId, courseName, instructorId, studentName } =
+          session.metadata;
+
+        // 1. Fetch Course Image from your courses collection
+        const courseData = await courseCollection.findOne({
+          _id: new ObjectId(courseId),
+        });
+
+        // 2. Fetch Mentor Name from your users/mentors collection using the UID
+        const mentorData = await mentorCollection.findOne({
+          uid: instructorId,
+        });
+
+        const enrollmentDoc = {
+          courseId,
+          courseName,
+          courseImage: courseData?.thumbnail || "", // Get image from DB
+          mentorName: mentorData?.name || "", // Get name from DB
+          instructorId, // This is the 'uid' (e.g., "qQsvCTx...")
+          studentName,
+          studentEmail: session.customer_email,
+          price: session.amount_total / 100,
+          transactionId: session.payment_intent,
+          status: "pending", // Student sees 'In Progress'
+          enrollDate: new Date(),
+        };
+
+        // Check if this transaction was already saved to prevent duplicates
+        const alreadySaved = await enrollmentCollection.findOne({
+          transactionId: session.payment_intent,
+        });
+        if (alreadySaved) return res.send({ success: true });
+
+        //  Save to your Enrollments collection
+        const result = await enrollmentCollection.insertOne(enrollmentDoc);
+        res.send({ success: true, result });
+      }
+    });
+
+    app.post("/create-checkout-session", async (req, res) => {
+      const enrollmentData = req.body;
+      const amount = parseInt(enrollmentData.price) * 100;
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              unit_amount: amount,
+              product_data: {
+                name: `Please pay for : ${enrollmentData.courseName}`,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        customer_email: enrollmentData.studentEmail,
+        mode: "payment",
+        metadata: {
+          courseId: enrollmentData.courseId,
+          courseName: enrollmentData.courseName,
+          instructorId: enrollmentData.instructorId,
+          studentName: enrollmentData.studentName,
+        },
+
+        success_url: `${process.env.SITE_DOMAIN}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.SITE_DOMAIN}/dashboard/payment-cancel`,
+      });
+
+      res.send({ url: session.url });
     });
 
     // Send a ping to confirm a successful connection

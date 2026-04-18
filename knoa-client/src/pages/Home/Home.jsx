@@ -8,13 +8,12 @@ import Statistics from "./components/Statistics";
 import NewsletterSection from "./components/NewsletterSection";
 
 const Home = () => {
-  const allCourse = useLoaderData();
   return (
     <div>
       <Banner></Banner>
       <WhyUs></WhyUs>
       <Statistics></Statistics>
-      <Courses allCourse={allCourse}></Courses>
+      <Courses></Courses>
       <MentorSection></MentorSection>
       <NewsletterSection></NewsletterSection>
     </div>

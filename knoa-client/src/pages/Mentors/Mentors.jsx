@@ -1,8 +1,20 @@
 import React from "react";
 import { Link, useLoaderData } from "react-router";
 import { motion } from "framer-motion";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useQuery } from "@tanstack/react-query";
 
 const Mentors = () => {
+  const axiosSecure = useAxiosSecure();
+
+  const { data: mentors = [], isLoading } = useQuery({
+    queryKey: ["mentors"],
+    queryFn: async () => {
+      const res = await axiosSecure.get("/mentors");
+      return res.data;
+    },
+  });
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -25,7 +37,7 @@ const Mentors = () => {
     },
   };
 
-  const allMentors = useLoaderData();
+  // const allMentors = useLoaderData();
   return (
     <div className="max-w-7xl mx-auto py-16 px-4">
       <motion.div
@@ -34,7 +46,7 @@ const Mentors = () => {
         initial="hidden"
         animate="visible"
       >
-        {allMentors.map((mentor) => (
+        {mentors.map((mentor) => (
           /* 2. Change the card to motion.div and add the item variants */
           <motion.div
             key={mentor._id}

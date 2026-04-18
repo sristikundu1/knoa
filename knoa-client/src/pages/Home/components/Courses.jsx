@@ -1,7 +1,21 @@
 import React from "react";
 import CourseCard from "./CourseCard";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import { useQuery } from "@tanstack/react-query";
+import Loading from "../../Loading/Loading";
 
-const Courses = ({ allCourse }) => {
+const Courses = () => {
+  const axiosSecure = useAxiosSecure();
+
+  const { data: courses = [], isLoading } = useQuery({
+    queryKey: ["courses"],
+    queryFn: async () => {
+      const res = await axiosSecure.get("/courses");
+      return res.data;
+    },
+  });
+
+  if (isLoading) return <Loading></Loading>;
   return (
     <section className=" max-w-7xl mx-auto px-4 py-8">
       <div className="container mx-auto  py-12">
@@ -29,12 +43,18 @@ const Courses = ({ allCourse }) => {
 
         {/* Your Course Grid would go here */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {allCourse
+          {courses
+
             /* 1. Sort by rating: highest to lowest */
+
             .sort((a, b) => b.rating - a.rating)
+
             /* 2. Take only the first 6 items */
+
             .slice(0, 6)
+
             /* 3. Render the cards */
+
             .map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}

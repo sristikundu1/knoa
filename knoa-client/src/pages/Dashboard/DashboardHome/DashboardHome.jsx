@@ -18,8 +18,8 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import { MdOutlineExplore } from "react-icons/md";
-import { AuthContext } from "./../../contexts/AuthContext";
 import { Link } from "react-router";
+import useAuth from "../../../hooks/UseAuth";
 
 const data = [
   { name: "Mon", activity: 40 },
@@ -32,7 +32,7 @@ const data = [
 ];
 
 const DashboardHome = () => {
-  const { user } = use(AuthContext);
+  const { user } = useAuth();
   const [stats, setStats] = useState({ courses: 0, mentors: 0 });
   const [topMentors, setTopMentors] = useState([]);
 

@@ -7,29 +7,42 @@ import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import Swal from "sweetalert2";
 import { useLoaderData, useNavigate } from "react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useAuth from "../../hooks/UseAuth";
+import { useForm } from "react-hook-form";
 
 const EditCourse = () => {
-  const {
-    _id,
-    courseName,
-    category,
-    difficulty,
-    duration,
-    rating,
-    mentorName,
-    shortDescription,
-    fullDescription,
-    tag,
-    language,
-    price,
-    isFree: initialIsFree,
-    thumbnail,
-    video,
-  } = useLoaderData();
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  // const {
+  //   _id,
+  //   courseName,
+  //   category,
+  //   difficulty,
+  //   duration,
+  //   rating,
+  //   mentorName,
+  //   shortDescription,
+  //   fullDescription,
+  //   tag,
+  //   language,
+  //   price,
+  //   isFree: initialIsFree,
+  //   thumbnail,
+  //   video,
+  // } = useLoaderData();
+  const loaderData = useLoaderData();
+  const { _id, fullDescription, isFree: initialIsFree } = loaderData;
   const navigate = useNavigate();
   const [isFree, setIsFree] = useState(initialIsFree || false);
   const [description, setDescription] = useState(fullDescription || "");
-  const [mentors, setMentors] = useState([]);
+
+  // 1. Initialize React Hook Form with default values from loaderData
+  const { register, handleSubmit, setValue } = useForm({
+    defaultValues: loaderData,
+  });
 
   // Toolbar configuration to keep the UI clean
   const modules = {
@@ -43,46 +56,47 @@ const EditCourse = () => {
   };
 
   // Fetch mentors from database on component mount
-  useEffect(() => {
-    fetch("https://knoa-server.vercel.app/mentors")
-      .then((res) => res.json())
-      .then((data) => setMentors(data))
-      .catch((err) => console.error("Error fetching mentors:", err));
-  }, []);
+
+  const { data: mentors = [] } = useQuery({
+    queryKey: ["mentor-data"],
+    queryFn: async () => {
+      const res = await axiosSecure.get("/mentors");
+      return res.data;
+    },
+  });
+
+  const { mutateAsync } = useMutation({
+    mutationFn: async (updatedData) => {
+      const res = await axiosSecure.patch(`/course/${_id}`, updatedData);
+      return res.data;
+    },
+
+    onSuccess: (data) => {
+      if (data.modifiedCount) {
+        queryClient.invalidateQueries(["course"]);
+        Swal.fire("Updated!", "Course updated successfully", "success");
+        navigate("/dashboard/all-courses");
+      } else {
+        Swal.fire("Info", "No changes made", "info");
+      }
+    },
+  });
 
   // handle publish course button
-  const handleEditCourse = (e) => {
-    e.preventDefault();
+  // React Hook Form Submit Handler
+  const onSubmit = async (data) => {
+    // Logic to find selected mentor
+    const selectedMentor = mentors.find((m) => m.uid === data.mentorUid);
 
-    const form = e.target;
+    const courseData = {
+      ...data,
+      mentorName: selectedMentor?.name || data.mentorName,
+      fullDescription: description,
+      isFree: isFree,
+      price: isFree ? 0 : parseFloat(data.price || 0),
+    };
 
-    const formData = new FormData(form);
-    const courseData = Object.fromEntries(formData.entries()); //get from input value
-
-    // formData.get('free') will be "on" if checked, and null if unchecked
-    courseData.isFree = formData.get("free") === "on";
-    courseData.price = courseData.isFree
-      ? 0
-      : parseFloat(courseData.price || 0);
-    delete courseData.free;
-
-    // console.log(courseData);
-
-    fetch(`https://knoa-server.vercel.app/course/${_id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(courseData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // console.log(data);
-        if (data.modifiedCount) {
-          Swal.fire("Updated!", "Course updated successfully", "success");
-          navigate("/dashboard/all-courses");
-        }
-      });
+    await mutateAsync(courseData);
   };
 
   // Animation Variants
@@ -118,12 +132,10 @@ const EditCourse = () => {
       </div>
 
       <form
-        onSubmit={handleEditCourse}
+        onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 lg:grid-cols-3 gap-8"
       >
-        {/* Left Column: Basic & Detailed Info */}
-        <div className="lg:col-span-2 space-y-6 ">
-          {/* Section 1: Basic Information */}
+        <div className="lg:col-span-2 space-y-6">
           <motion.div
             variants={itemVariants}
             className="bg-white p-8 rounded-2xl border border-blue-50 shadow-[3px_4px_0px_1px_#eff6ff] space-y-6"
@@ -132,7 +144,6 @@ const EditCourse = () => {
               <FiBookOpen className="text-[#0077b6]" /> Basic Information
             </h3>
 
-            {/* Input Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="form-control">
                 <label className="label">
@@ -141,11 +152,9 @@ const EditCourse = () => {
                   </span>
                 </label>
                 <input
+                  {...register("courseName")}
                   type="text"
-                  name="courseName"
-                  placeholder="e.g. Advanced React Patterns"
-                  className="input input-bordered bg-slate-50 focus:border-blue-400 "
-                  defaultValue={courseName}
+                  className="input input-bordered bg-slate-50"
                 />
               </div>
 
@@ -156,18 +165,12 @@ const EditCourse = () => {
                   </span>
                 </label>
                 <select
-                  name="category"
-                  defaultValue={category}
+                  {...register("category")}
                   className="select select-bordered bg-slate-50"
                 >
-                  <option value="" disabled>
-                    Select Category
-                  </option>
                   <option value="development">Development</option>
                   <option value="data-science">Data Science</option>
                   <option value="design">Design</option>
-                  <option value="marketing">Marketing</option>
-                  <option value="business">Business</option>
                   <option value="programming">Programming</option>
                   <option value="IT-and-Software">IT & Software</option>
                 </select>
@@ -180,8 +183,7 @@ const EditCourse = () => {
                   </span>
                 </label>
                 <select
-                  name="difficulty"
-                  defaultValue={difficulty}
+                  {...register("difficulty")}
                   className="select select-bordered bg-slate-50"
                 >
                   <option>Beginner</option>
@@ -193,14 +195,12 @@ const EditCourse = () => {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text font-medium text-slate-600">
-                    Duration (e.g. 25h)
+                    Duration
                   </span>
                 </label>
                 <input
+                  {...register("duration")}
                   type="text"
-                  name="duration"
-                  defaultValue={duration}
-                  placeholder="25h"
                   className="input input-bordered bg-slate-50"
                 />
               </div>
@@ -212,10 +212,8 @@ const EditCourse = () => {
                   </span>
                 </label>
                 <input
+                  {...register("rating")}
                   type="text"
-                  name="rating"
-                  defaultValue={rating}
-                  placeholder="rating"
                   className="input input-bordered bg-slate-50"
                 />
               </div>
@@ -227,46 +225,35 @@ const EditCourse = () => {
                   </span>
                 </label>
                 <select
-                  name="mentorName"
-                  defaultValue={mentorName}
+                  {...register("mentorUid")}
                   className="select select-bordered bg-slate-50"
                 >
-                  <option value="" disabled>
-                    Select a Mentor
-                  </option>
-
-                  {/* Map through the mentors from database */}
                   {mentors.map((mentor) => (
-                    <option key={mentor._id} value={mentor.name}>
-                      {mentor.name} ({mentor.expertise})
+                    <option key={mentor._id} value={mentor.uid}>
+                      {mentor.name} {mentor.uid === user?.uid ? "(Me)" : ""}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Short Description: Now spans 2 columns */}
               <div className="form-control md:col-span-2">
                 <label className="label">
                   <span className="label-text font-medium text-slate-600">
                     Short Description
                   </span>
                 </label>
-
                 <textarea
-                  name="shortDescription"
-                  defaultValue={shortDescription}
+                  {...register("shortDescription")}
                   className="textarea textarea-bordered bg-slate-50 h-32 w-full"
                 ></textarea>
               </div>
 
-              {/* Full Description: Now spans 2 columns */}
               <div className="form-control md:col-span-2">
                 <label className="label">
                   <span className="label-text font-medium text-slate-600">
                     Full Description
                   </span>
                 </label>
-
                 <div className="rounded-xl border border-slate-200 overflow-hidden">
                   <ReactQuill
                     theme="snow"
@@ -276,18 +263,10 @@ const EditCourse = () => {
                     className="bg-white min-h-[200px]"
                   />
                 </div>
-
-                {/* CRITICAL: This hidden input sends the data to handleAddCourse */}
-                <input
-                  type="hidden"
-                  name="fullDescription"
-                  value={description}
-                />
               </div>
             </div>
           </motion.div>
 
-          {/* Section 2: Learning Outcomes & Requirements */}
           <motion.div
             variants={itemVariants}
             className="bg-white p-8 rounded-2xl border border-blue-50 shadow-[3px_4px_0px_1px_#eff6ff] space-y-6"
@@ -300,13 +279,11 @@ const EditCourse = () => {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text font-medium text-slate-600">
-                    Tags (Comma separated)
+                    Tags
                   </span>
                 </label>
                 <input
-                  type="text"
-                  name="tag"
-                  defaultValue={tag}
+                  {...register("tag")}
                   className="input input-bordered bg-slate-50"
                 />
               </div>
@@ -317,9 +294,7 @@ const EditCourse = () => {
                   </span>
                 </label>
                 <input
-                  type="text"
-                  name="language"
-                  defaultValue={language}
+                  {...register("language")}
                   className="input input-bordered bg-slate-50"
                 />
               </div>
@@ -327,9 +302,7 @@ const EditCourse = () => {
           </motion.div>
         </div>
 
-        {/* Right Column: Media & Pricing */}
         <div className="space-y-6">
-          {/* Pricing Card */}
           <motion.div
             variants={itemVariants}
             className="bg-white p-8 rounded-2xl border border-blue-50 shadow-[3px_4px_0px_1px_#eff6ff] space-y-4"
@@ -337,13 +310,11 @@ const EditCourse = () => {
             <h3 className="text-lg font-semibold text-[#03045e] flex items-center gap-2">
               <IoPricetagsOutline className="text-[#0077b6]" /> Pricing
             </h3>
-
             <div className="flex items-center justify-between bg-blue-50 p-3 rounded-xl mb-4">
               <span className="text-sm font-medium text-[#0077b6]">
                 Is this a free course?
               </span>
               <input
-                name="free"
                 type="checkbox"
                 className="toggle toggle-primary"
                 checked={isFree}
@@ -355,18 +326,14 @@ const EditCourse = () => {
                 Price ($)
               </label>
               <input
-                key={isFree ? "free" : "paid"}
+                {...register("price")}
                 type="number"
-                name="price"
-                defaultValue={price}
                 disabled={isFree}
-                placeholder="0"
                 className="input input-bordered bg-slate-50 font-bold text-[#0077b6]"
               />
             </div>
           </motion.div>
 
-          {/* Media Card */}
           <motion.div
             variants={itemVariants}
             className="bg-white p-8 rounded-2xl border border-blue-50 shadow-[3px_4px_0px_1px_#eff6ff] space-y-6"
@@ -374,64 +341,47 @@ const EditCourse = () => {
             <h3 className="text-lg font-semibold text-[#03045e] flex items-center gap-2">
               <FiImage className="text-[#0077b6]" /> Media
             </h3>
-
             <div className="form-control">
               <label className="label font-medium text-slate-600">
                 Thumbnail URL
               </label>
               <input
-                type="text"
-                name="thumbnail"
-                defaultValue={thumbnail}
+                {...register("thumbnail")}
                 className="input input-bordered bg-slate-50 text-xs"
               />
             </div>
-
             <div className="form-control">
               <label className="label font-medium text-slate-600">
-                Intro Video URL (YouTube/Vimeo)
+                Intro Video URL
               </label>
               <div className="relative">
                 <FiVideo className="absolute left-3 top-4 text-slate-400" />
                 <input
-                  type="text"
-                  name="video"
-                  defaultValue={video}
+                  {...register("video")}
                   className="input input-bordered bg-slate-50 pl-10 text-xs w-full"
                 />
               </div>
             </div>
           </motion.div>
 
-          {/* Submit Action */}
           <div className="relative overflow-hidden rounded-2xl">
             <motion.button
-              // 1. Continuous Floating Animation (Idle)
-              animate={{
-                y: [0, -4, 0],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              // 2. Interaction States
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               whileHover={{
                 scale: 1.05,
                 boxShadow: "0px 20px 30px rgba(0, 180, 216, 0.3)",
               }}
               whileTap={{ scale: 0.95 }}
+              type="submit"
               className="relative group btn btn-primary w-full h-14 rounded-2xl text-lg border-none bg-[#00b4d8] hover:bg-[#03045e] transition-colors duration-500 overflow-hidden"
             >
-              {/* 3. The "Shine" Sweep Effect */}
               <motion.div
                 initial={{ x: "-100%" }}
                 whileHover={{ x: "100%" }}
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
               />
-
-              {/* Button Content */}
               <span className="relative z-10 flex items-center justify-center gap-2 tracking-wide">
                 Update Course
                 <motion.span
@@ -441,27 +391,7 @@ const EditCourse = () => {
                   🚀
                 </motion.span>
               </span>
-
-              {/* 4. Background Pulse Effect on Hover */}
-              <motion.div
-                className="absolute inset-0 bg-[#48cae4] opacity-0 group-hover:opacity-20 transition-opacity"
-                initial={false}
-              />
             </motion.button>
-
-            {/* 5. Subtle Shadow Pulse underneath */}
-            <motion.div
-              animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.2, 0.4, 0.2],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4/5 h-4 bg-[#00b4d8] blur-xl rounded-full -z-10"
-            />
           </div>
         </div>
       </form>

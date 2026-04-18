@@ -8,40 +8,14 @@ import {
 import { Link } from "react-router";
 import { FiX } from "react-icons/fi";
 import Swal from "sweetalert2";
-const CourseCard = ({ course, setCourses, courses }) => {
-  const handleDelete = (_id) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed)
-        // delete data from ui
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+const CourseCard = ({ course }) => {
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
 
-        fetch(`https://knoa-server.vercel.app/course/${_id}`, {
-          method: "DELETE",
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            // console.log("after delete", data);
-            if (data.deletedCount) {
-              Swal.fire({
-                title: "Deleted!",
-                text: "Your course has been deleted.",
-                icon: "success",
-              });
-
-              const remainingCourse = courses.filter((cor) => cor._id !== _id);
-              setCourses(remainingCourse);
-            }
-          });
-    });
-  };
   const {
+    _id,
     thumbnail,
     title,
     difficulty,
@@ -50,7 +24,46 @@ const CourseCard = ({ course, setCourses, courses }) => {
     courseName,
     duration,
     rating,
+    mentorName,
+    isFree,
   } = course;
+
+  //  delete course from database
+  const { mutateAsync: deleteCourse } = useMutation({
+    mutationFn: async (id) => {
+      const res = await axiosSecure.delete(`/course/${_id}`);
+      return res.data;
+    },
+
+    onSuccess: (data) => {
+      if (data.deletedCount) {
+        queryClient.invalidateQueries(["courses"]);
+        Swal.fire("Deleted!", "Your course has been deleted.", "success");
+      } else {
+        Swal.fire("Error", "course not found", "error");
+      }
+    },
+
+    onError: () => {
+      Swal.fire("Error", "Delete failed", "error");
+    },
+  });
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      await deleteCourse(id);
+    }
+  };
   return (
     <div className="relative">
       <div

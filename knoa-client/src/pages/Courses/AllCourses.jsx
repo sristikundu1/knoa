@@ -2,16 +2,30 @@ import React, { useState } from "react";
 import { Link, useLoaderData } from "react-router";
 import CourseCard from "./components/CourseCard";
 import CourseFilter from "./components/CourseFilter";
+import { useQuery } from "@tanstack/react-query";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import Loading from "../Loading/Loading";
 
-const Courses = () => {
-  const allCourses = useLoaderData();
-
-  const [courses, setCourses] = useState(allCourses);
+const AllCourses = () => {
+  const axiosSecure = useAxiosSecure();
 
   // 1. Create states for the filters
   const [category, setCategory] = useState("All");
   const [level, setLevel] = useState("All Course");
   const [price, setPrice] = useState("All");
+
+  const { data: courses = [], isLoading } = useQuery({
+    queryKey: ["courses"],
+    queryFn: async () => {
+      const res = await axiosSecure.get("/courses");
+      return res.data;
+    },
+  });
+
+  // Loading state
+  if (isLoading) {
+    return <Loading></Loading>;
+  }
 
   // 2. Simple Filter Logic
   const displayCourses = courses.filter((course) => {
@@ -23,7 +37,6 @@ const Courses = () => {
     if (price === "All") {
       priceMatch = true;
     } else if (price === "Free") {
-      // Now you can check your new boolean!
       priceMatch = course.isFree === true || course.price === 0;
     } else if (price === "Paid") {
       priceMatch = course.isFree === false && course.price > 0;
@@ -38,12 +51,7 @@ const Courses = () => {
       <div className="flex-1 space-y-6">
         {displayCourses.length > 0 ? (
           displayCourses.map((course) => (
-            <CourseCard
-              key={course._id}
-              course={course}
-              setCourses={setCourses}
-              courses={courses}
-            />
+            <CourseCard key={course._id} course={course} />
           ))
         ) : (
           <p className="text-center py-10 text-slate-500">
@@ -59,10 +67,9 @@ const Courses = () => {
           items={[
             "All",
             "Programming",
-            "Marketing",
             "Design",
             "Development",
-            "Business",
+            "data-science",
             "IT & Software",
           ]}
           activeItem={category}
@@ -87,4 +94,4 @@ const Courses = () => {
   );
 };
 
-export default Courses;
+export default AllCourses;

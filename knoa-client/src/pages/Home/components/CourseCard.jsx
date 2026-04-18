@@ -117,7 +117,7 @@ const CourseCard = ({ course }) => {
           </div>
 
           {/* View Course Button (Slides up from bottom) */}
-          <Link to={`/dashboard/course/${_id}`}>
+          <Link to={`/course/${_id}`}>
             <button className="view_course_btn">View Course</button>
           </Link>
         </div>

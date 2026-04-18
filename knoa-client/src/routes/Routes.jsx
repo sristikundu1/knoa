@@ -3,21 +3,17 @@ import HomeLayout from "../layouts/HomeLayout";
 import Home from "../pages/Home/Home";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
 import AuthLayout from "../layouts/AuthLayout";
-import Login from "./../pages/Login/Login";
-import Register from "./../pages/Register/Register";
 import DashboardLayout from "./../layouts/DashboardLayout";
-import DashboardHome from "./../pages/DashboardHome/DashboardHome";
 import AddCourse from "../pages/AddCourse/AddCourse";
 import Profile from "../pages/Profile/Profile";
 import Mentors from "../pages/Mentors/Mentors";
 import MentorDetails from "../pages/MentorDetails/MentorDetails";
-import Courses from "../pages/Courses/Courses";
+import Courses from "../pages/Courses/AllCourses";
 import CourseDetails from "../pages/CourseDetails/CourseDetails";
 import EditCourse from "../pages/EditCourse/EditCourse";
 import Contact from "../pages/Contact/Contact";
 import FAQ from "../pages/FAQ/FAQ";
 import FavCourses from "./../pages/FavCourses/FavCourses";
-import UpdateProfile from "../pages/UpdateUser/UpdateUser";
 import PrivateRoute from "./../contexts/PrivateRoute";
 import AdminRoute from "../contexts/AdminRoute";
 import Polices from "./../pages/Polices/Polices";
@@ -25,6 +21,15 @@ import MernRoadmap from "./../pages/MernRoadmap/MernRoadmap";
 import InterviewPrep from "../pages/InterviewPrep/InterviewPrep";
 import CertificateVerify from "../pages/Home/CertificateVerify/CertificateVerify";
 import DigitalLibrary from "../pages/Home/DigitalLibrary/DigitalLibrary";
+import Login from "../pages/Auth/Login/Login";
+import Register from "../pages/Auth/Register/Register";
+import ManageUser from "../pages/Dashboard/AdminDashboard/ManageUser/ManageUser";
+import DashboardHome from "../pages/Dashboard/DashboardHome/DashboardHome";
+import UpdateProfile from "../pages/Dashboard/MentorDashboard/UpdateProfile/UpdateProfile";
+import AllCourses from "../pages/Courses/AllCourses";
+import StudentCourses from "../pages/StudentCourses/StudentCourses";
+import MyEnrollments from "../pages/Dashboard/StudentDashBoard/MyEnrollments";
+import PaymentSuccess from "../pages/Dashboard/StudentDashBoard/PaymentSuccess";
 
 const Routes = createBrowserRouter([
   {
@@ -35,18 +40,25 @@ const Routes = createBrowserRouter([
       {
         index: true,
         element: <Home></Home>,
-        loader: () => fetch("https://knoa-server.vercel.app/courses"),
       },
       {
         path: "mentors",
         element: <Mentors></Mentors>,
-        loader: () => fetch("https://knoa-server.vercel.app/mentors"),
+        // loader: () => fetch("https://knoa-server.vercel.app/mentors"),
       },
       {
         path: "mentor/:id",
         element: <MentorDetails></MentorDetails>,
         loader: ({ params }) =>
           fetch(`https://knoa-server.vercel.app/users/mentor/${params.id}`),
+      },
+      {
+        path: "/courses",
+        element: <StudentCourses></StudentCourses>,
+      },
+      {
+        path: "course/:id",
+        element: <CourseDetails></CourseDetails>,
       },
       {
         path: "contact",
@@ -96,7 +108,7 @@ const Routes = createBrowserRouter([
     path: "dashboard",
     element: (
       <PrivateRoute>
-        <DashboardLayout />
+        <DashboardLayout></DashboardLayout>
       </PrivateRoute>
     ),
     id: "dashboard-data",
@@ -107,29 +119,35 @@ const Routes = createBrowserRouter([
         element: <DashboardHome />,
       },
       {
+        path: "manage-user",
+        element: <ManageUser></ManageUser>,
+      },
+      {
+        path: "update-profile",
+        element: <UpdateProfile></UpdateProfile>,
+      },
+      {
         path: "/dashboard/add-course",
-        element: (
-          <AdminRoute>
-            <AddCourse></AddCourse>
-          </AdminRoute>
-        ),
+        element: <AddCourse></AddCourse>,
       },
       {
         path: "/dashboard/all-courses",
-        element: <Courses></Courses>,
-        loader: () => fetch("https://knoa-server.vercel.app/courses"),
+        element: <AllCourses></AllCourses>,
       },
-      {
-        path: "course/:id",
-        element: <CourseDetails></CourseDetails>,
-        loader: ({ params }) =>
-          fetch(`https://knoa-server.vercel.app/course/${params.id}`),
-      },
+
       {
         path: "edit-course/:id",
         element: <EditCourse></EditCourse>,
         loader: ({ params }) =>
           fetch(`https://knoa-server.vercel.app/course/${params.id}`),
+      },
+      {
+        path: "/dashboard/my-enrollments",
+        element: <MyEnrollments></MyEnrollments>,
+      },
+      {
+        path: "/dashboard/payment-success",
+        element: <PaymentSuccess></PaymentSuccess>,
       },
       {
         path: "wishlist",
@@ -139,10 +157,10 @@ const Routes = createBrowserRouter([
         path: "/dashboard/profile",
         element: <Profile></Profile>,
       },
-      {
-        path: "/dashboard/update-profile",
-        element: <UpdateProfile></UpdateProfile>,
-      },
+      // {
+      //   path: "/dashboard/update-profile",
+      //   element: <UpdateProfile></UpdateProfile>,
+      // },
     ],
   },
 ]);

@@ -1,5 +1,5 @@
 import React, { use, useEffect, useState } from "react";
-import { useLoaderData, Link } from "react-router";
+import { useLoaderData, Link, useParams } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiCheckCircle,
@@ -10,70 +10,51 @@ import {
 } from "react-icons/fi";
 import { AuthContext } from "../../contexts/AuthContext";
 import Swal from "sweetalert2";
+import { FaChalkboardTeacher } from "react-icons/fa";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useQuery } from "@tanstack/react-query";
+import Loading from "../Loading/Loading";
 
 const CourseDetails = () => {
-  const course = useLoaderData();
+  const axiosSecure = useAxiosSecure();
   const { user } = use(AuthContext);
-  const [allCourse, setAllCourse] = useState([]);
+  const { id } = useParams();
   const [isEnrolling, setIsEnrolling] = useState(false);
 
-  useEffect(() => {
-    fetch("https://knoa-server.vercel.app/courses")
-      .then((res) => res.json())
-      .then((data) => setAllCourse(data));
-  }, []);
+  // fetch data from backend
+  const { data, isLoading } = useQuery({
+    queryKey: ["course", id],
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/course/${id}`);
+      return res.data;
+    },
+  });
+
+  // Destructure for easier use
+  const { course = {}, relatedCourses = [] } = data || {};
+
+  if (isLoading) return <Loading></Loading>;
 
   // --- Enrollment Logic ---
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     setIsEnrolling(true);
 
     const enrollmentData = {
       courseId: course._id,
       courseName: course.courseName,
-      courseImage: course.thumbnail,
-      instructorEmail: course.mentorEmail,
+      instructorId: course.mentorUid,
       price: course.price,
       studentEmail: user?.email,
       studentName: user?.displayName,
-      studentImage: user?.photoURL,
       enrollDate: new Date().toISOString(),
-      status: "enrolled",
     };
 
-    fetch("https://knoa-server.vercel.app/enroll", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(enrollmentData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setIsEnrolling(false);
-        if (data.insertedId) {
-          Swal.fire({
-            icon: "success",
-            title: "Success!",
-            text: "You have enrolled in this course.",
-            showConfirmButton: false,
-            timer: 2000,
-            background: "#ffffff",
-            iconColor: "#39B8AD",
-          });
-        }
-      })
-      .catch((err) => {
-        setIsEnrolling(false);
-        console.error("Enrollment error:", err);
-        Swal.fire({
-          icon: "error",
-          title: "Failed",
-          text: "Something went wrong. Please try again.",
-        });
-      });
+    const res = await axiosSecure.post(
+      "/create-checkout-session",
+      enrollmentData,
+    );
+    window.location.href = res.data.url;
   };
-
-  const relatedCourse = allCourse.filter(
-    (c) => c.category === course.category && c._id !== course._id,
-  );
 
   // Animation variants
   const containerVars = {
@@ -104,7 +85,7 @@ const CourseDetails = () => {
                 variants={itemVars}
                 className="text-4xl lg:text-5xl font-black text-[#03045e] leading-tight"
               >
-                {course.courseName}
+                {course?.courseName}
               </motion.h1>
 
               <motion.p
@@ -170,6 +151,11 @@ const CourseDetails = () => {
 
                   <div className="space-y-4 pt-4 border-t border-slate-50">
                     <StatRow
+                      icon={<FaChalkboardTeacher />}
+                      label="mentor"
+                      value={course.mentorName}
+                    />
+                    <StatRow
                       icon={<FiClock />}
                       label="Duration"
                       value={course.duration}
@@ -194,7 +180,7 @@ const CourseDetails = () => {
                   Other Courses
                 </h4>
                 <div className="space-y-6">
-                  {relatedCourse.map((cat) => (
+                  {relatedCourses.map((cat) => (
                     <RelatedItem
                       key={cat._id}
                       id={cat._id}
@@ -226,7 +212,7 @@ const StatRow = ({ icon, label, value }) => (
 const Accordion = ({ html }) => {
   const [openIndex, setOpenIndex] = useState(null);
 
-  // 🔥 Parse HTML into structured data
+  //  Parse HTML into structured data
   const parseContent = (htmlString) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, "text/html");
