@@ -1,9 +1,8 @@
 import React from "react";
 import Loading from "../pages/Loading/Loading";
-import useRole from "../hooks/useRole";
-import useAuth from "../hooks/UseAuth";
+import Forbidden from "../components/Forbodden/Forbidden";
 
-const AdminRoute = ({ children }) => {
+const AdministrativeRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
   const { role, roleLoading } = useRole();
 
@@ -11,11 +10,11 @@ const AdminRoute = ({ children }) => {
     return <Loading></Loading>;
   }
 
-  if (role !== "admin") {
-    return;
+  if (!allowedRoles.includes(user.role)) {
+    return <Forbidden></Forbidden>;
   }
 
   return children;
 };
 
-export default AdminRoute;
+export default AdministrativeRoute;

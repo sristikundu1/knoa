@@ -14,8 +14,7 @@ import EditCourse from "../pages/EditCourse/EditCourse";
 import Contact from "../pages/Contact/Contact";
 import FAQ from "../pages/FAQ/FAQ";
 import FavCourses from "./../pages/FavCourses/FavCourses";
-import PrivateRoute from "./../contexts/PrivateRoute";
-import AdminRoute from "../contexts/AdminRoute";
+import PrivateRoute from "./PrivateRoute";
 import Polices from "./../pages/Polices/Polices";
 import MernRoadmap from "./../pages/MernRoadmap/MernRoadmap";
 import InterviewPrep from "../pages/InterviewPrep/InterviewPrep";
@@ -34,6 +33,8 @@ import EnrollmentManagement from "../pages/Dashboard/AdminDashboard/EnrollmentMa
 import MentorEnrollments from "../pages/Dashboard/MentorDashboard/MentorEnrollments";
 import Subscribers from "../pages/Dashboard/AdminDashboard/Subscribers";
 import FavoriteCourse from "../pages/Dashboard/StudentDashBoard/FavoriteCourse";
+import AdministrativeRoute from "./AdministrativeRoute";
+import PaymentCancel from "../pages/Dashboard/StudentDashBoard/PaymentCancel";
 
 const Routes = createBrowserRouter([
   {
@@ -132,26 +133,63 @@ const Routes = createBrowserRouter([
       },
       {
         path: "/dashboard/add-course",
-        element: <AddCourse></AddCourse>,
+        element: (
+          <AdministrativeRoute allowedRoles={["mentor"]}>
+            <AddCourse></AddCourse>
+          </AdministrativeRoute>
+        ),
+      },
+      {
+        path: "/dashboard/enrolled-students",
+        element: (
+          <AdministrativeRoute allowedRoles={["mentor"]}>
+            <MentorEnrollments></MentorEnrollments>
+          </AdministrativeRoute>
+        ),
+      },
+      {
+        path: "/dashboard/update-profile",
+        element: (
+          <AdministrativeRoute allowedRoles={["mentor"]}>
+            <UpdateProfile></UpdateProfile>
+          </AdministrativeRoute>
+        ),
       },
       {
         path: "/dashboard/all-courses",
-        element: <AllCourses></AllCourses>,
+        element: (
+          <AdministrativeRoute allowedRoles={["mentor", "admin"]}>
+            <AllCourses></AllCourses>
+          </AdministrativeRoute>
+        ),
       },
 
       {
         path: "edit-course/:id",
-        element: <EditCourse></EditCourse>,
+        element: (
+          <AdministrativeRoute allowedRoles={["mentor", "admin"]}>
+            <EditCourse></EditCourse>{" "}
+          </AdministrativeRoute>
+        ),
         loader: ({ params }) =>
           fetch(`https://knoa-server.vercel.app/course/${params.id}`),
       },
-      {
-        path: "/dashboard/enrolled-students",
-        element: <MentorEnrollments></MentorEnrollments>,
-      },
+
       {
         path: "/dashboard/manage-enrollment",
-        element: <EnrollmentManagement></EnrollmentManagement>,
+        element: (
+          <AdministrativeRoute allowedRoles={["admin"]}>
+            <EnrollmentManagement></EnrollmentManagement>
+          </AdministrativeRoute>
+        ),
+      },
+      {
+        path: "/dashboard/subscribers",
+        element: (
+          <AdministrativeRoute allowedRoles={["admin"]}>
+            <Subscribers></Subscribers>
+          </AdministrativeRoute>
+        ),
       },
       {
         path: "/dashboard/my-enrollments",
@@ -162,20 +200,17 @@ const Routes = createBrowserRouter([
         element: <PaymentSuccess></PaymentSuccess>,
       },
       {
-        path: "/dashboard/subscribers",
-        element: <Subscribers></Subscribers>,
+        path: "/dashboard/payment-cancel",
+        element: <PaymentCancel></PaymentCancel>,
       },
+
       {
         path: "/dashboard/fav-courses",
         element: <FavoriteCourse></FavoriteCourse>,
       },
-      {
-        path: "/dashboard/profile",
-        element: <Profile></Profile>,
-      },
       // {
-      //   path: "/dashboard/update-profile",
-      //   element: <UpdateProfile></UpdateProfile>,
+      //   path: "/dashboard/profile",
+      //   element: <Profile></Profile>,
       // },
     ],
   },
