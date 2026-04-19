@@ -8,10 +8,33 @@ const app = express();
 const stripe = require("stripe")(process.env.STRIPE_SECRETE);
 const port = process.env.PORT || 3000;
 
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./knoa-firebase-adminsdk.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 app.use(cors());
 app.use(express.json());
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+const verifyFBToken = async (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  try {
+    const idToken = token.split(" ")[1];
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    req.decoded_email = decoded.email;
+    next();
+  } catch (err) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+};
 app.get("/", (req, res) => {
   res.send("Learning is on!");
 });
@@ -39,9 +62,21 @@ async function run() {
     const enrollmentCollection = client.db("KnoaDB").collection("enrollment");
     const subscriberCollection = client.db("KnoaDB").collection("subscribers");
 
+    // middleware admin before allowing admin activity with database access must be after verifyFBToken
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded_email;
+      const query = { email };
+      const user = await userCollection.findOne(query);
+
+      if (!user || user.role !== "admin") {
+        return res.status(401).send({ message: "forbidden access" });
+      }
+      next();
+    };
+
     // API for user
     // get all the user data from database
-    app.get("/users", async (req, res) => {
+    app.get("/users", verifyFBToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -81,23 +116,28 @@ async function run() {
     });
 
     // ADMIN: update user role in db
-    app.patch("/users/role/:id", async (req, res) => {
-      const id = req.params.id;
-      const { role } = req.body;
-      const filter = { _id: new ObjectId(id) };
+    app.patch(
+      "/users/role/:id",
+      verifyFBToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const { role } = req.body;
+        const filter = { _id: new ObjectId(id) };
 
-      const updatedDoc = {
-        $set: {
-          role: role,
-        },
-      };
+        const updatedDoc = {
+          $set: {
+            role: role,
+          },
+        };
 
-      const result = await userCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    });
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      },
+    );
 
     // USER: update info
-    app.patch("/users/:email", async (req, res) => {
+    app.patch("/users/:email", verifyFBToken, async (req, res) => {
       const { role, ...otherData } = req.body;
       const filter = { email: req.params.email };
       const updatedDoc = {
@@ -111,7 +151,7 @@ async function run() {
     });
 
     // delete user from db
-    app.delete("/users/:id", async (req, res) => {
+    app.delete("/users/:id", verifyFBToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
 
@@ -160,7 +200,7 @@ async function run() {
     });
 
     // update course details
-    app.patch("/course/:id", async (req, res) => {
+    app.patch("/course/:id", verifyFBToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
 
@@ -175,28 +215,12 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/course/:id", async (req, res) => {
+    app.delete("/course/:id", verifyFBToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await courseCollection.deleteOne(query);
       res.send(result);
     });
-
-    // update user info
-    // app.patch("/users/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const updatedInfo = req.body;
-    //   // Remove sensitive fields if they exist in the body
-    //   delete updatedInfo._id;
-    //   delete updatedInfo.email;
-
-    //   const filter = { email: email };
-    //   const updateDoc = {
-    //     $set: updatedInfo,
-    //   };
-    //   const result = await userCollection.updateOne(filter, updateDoc);
-    //   res.send(result);
-    // });
 
     // mentor API handle
 
@@ -234,7 +258,7 @@ async function run() {
     });
 
     // insert mentor data if exist then update mentor data
-    app.post("/mentors", async (req, res) => {
+    app.post("/mentors", verifyFBToken, async (req, res) => {
       mentorData = req.body;
 
       const query = { email: mentorData.email };
@@ -294,11 +318,15 @@ async function run() {
     });
 
     // for student profile
-    app.get("/my-enrolled-courses", async (req, res) => {
+    app.get("/my-enrolled-courses", verifyFBToken, async (req, res) => {
       const email = req.query.email;
 
       if (!email) {
         return res.status(400).send({ message: "Email is required" });
+      }
+
+      if (email !== req.decoded_email) {
+        return res.status(400).send({ message: "forbidden access" });
       }
 
       // We search the enrollmentCollection for the student's email
@@ -308,14 +336,19 @@ async function run() {
     });
 
     // for mentor profile
-    app.get("/courses-by-mentor", async (req, res) => {
-      const name = req.query.name;
+    app.get(
+      "/courses-by-mentor",
+      verifyFBToken,
+      verifyAdmin,
+      async (req, res) => {
+        const name = req.query.name;
 
-      // We search the main courseCollection for courses this mentor created
-      const query = { mentorName: name };
-      const result = await courseCollection.find(query).toArray();
-      res.send(result);
-    });
+        // We search the main courseCollection for courses this mentor created
+        const query = { mentorName: name };
+        const result = await courseCollection.find(query).toArray();
+        res.send(result);
+      },
+    );
 
     // subscribe related API
 
@@ -340,23 +373,28 @@ async function run() {
     });
 
     //  GET: Admin view all subscribers
-    app.get("/subscribers", async (req, res) => {
+    app.get("/subscribers", verifyFBToken, verifyAdmin, async (req, res) => {
       const result = await subscriberCollection.find().toArray();
       res.send(result);
     });
 
     // delete subscriber
-    app.delete("/subscribers/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await subscriberCollection.deleteOne(query);
-      res.send(result);
-    });
+    app.delete(
+      "/subscribers/:id",
+      verifyFBToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await subscriberCollection.deleteOne(query);
+        res.send(result);
+      },
+    );
 
     // enrollment related API
 
     // STUDENT ROUTE: Get only my courses
-    app.get("/my-enrollments/:email", async (req, res) => {
+    app.get("/my-enrollments/:email", verifyFBToken, async (req, res) => {
       const email = req.params.email;
       const result = await enrollmentCollection
         .find({ studentEmail: email })
@@ -365,62 +403,77 @@ async function run() {
     });
 
     // MENTOR ROUTE: Get students count and info for mentor courses specifically
-    app.get("/mentor/course-stats/:mentorUid", async (req, res) => {
-      const { mentorUid } = req.params;
+    app.get(
+      "/mentor/course-stats/:mentorUid",
+      verifyFBToken,
+      verifyAdmin,
+      async (req, res) => {
+        const { mentorUid } = req.params;
 
-      const result = await enrollmentCollection
-        .aggregate([
-          {
-            $match: {
-              instructorId: mentorUid,
-              status: "completed",
+        const result = await enrollmentCollection
+          .aggregate([
+            {
+              $match: {
+                instructorId: mentorUid,
+                status: "completed",
+              },
             },
-          },
-          {
-            $group: {
-              _id: "$courseId",
-              courseName: { $first: "$courseName" },
-              courseImage: { $first: "$courseImage" },
-              price: { $first: "$price" },
-              totalStudents: { $sum: 1 },
+            {
+              $group: {
+                _id: "$courseId",
+                courseName: { $first: "$courseName" },
+                courseImage: { $first: "$courseImage" },
+                price: { $first: "$price" },
+                totalStudents: { $sum: 1 },
+              },
             },
-          },
-        ])
-        .toArray();
+          ])
+          .toArray();
 
-      // total students calculation from grouped result
-      const totalStudents = result.reduce(
-        (acc, course) => acc + course.totalStudents,
-        0,
-      );
+        // total students calculation from grouped result
+        const totalStudents = result.reduce(
+          (acc, course) => acc + course.totalStudents,
+          0,
+        );
 
-      res.send({
-        courses: result,
-        totalStudents,
-      });
-    });
+        res.send({
+          courses: result,
+          totalStudents,
+        });
+      },
+    );
 
     // ADMIN ROUTE : get everything for  management
-    app.get("/admin/enrollments", async (req, res) => {
-      const result = await enrollmentCollection.find().toArray();
-      res.send(result);
-    });
+    app.get(
+      "/admin/enrollments",
+      verifyFBToken,
+      verifyAdmin,
+      async (req, res) => {
+        const result = await enrollmentCollection.find().toArray();
+        res.send(result);
+      },
+    );
 
     // ADMIN ACTION: Accept or Reject
-    app.patch("/enrollments/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const { status } = req.body;
+    app.patch(
+      "/enrollments/:id",
+      verifyFBToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const { status } = req.body;
 
-      const updatedDoc = {
-        $set: {
-          status: status,
-        },
-      };
+        const updatedDoc = {
+          $set: {
+            status: status,
+          },
+        };
 
-      const result = await enrollmentCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    });
+        const result = await enrollmentCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      },
+    );
 
     // Payment related API
 
