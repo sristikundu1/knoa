@@ -49,13 +49,12 @@ const Routes = createBrowserRouter([
       {
         path: "mentors",
         element: <Mentors></Mentors>,
-        // loader: () => fetch("https://knoa-server.vercel.app/mentors"),
       },
       {
         path: "mentor/:id",
         element: <MentorDetails></MentorDetails>,
-        loader: ({ params }) =>
-          fetch(`https://knoa-server.vercel.app/users/mentor/${params.id}`),
+        // loader: ({ params }) =>
+        // fetch(`https://knoa-server.vercel.app/users/mentor/${params.id}`),
       },
       {
         path: "/courses",

@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { FiHelpCircle, FiArrowRight } from "react-icons/fi";
 
-const MentorBanner = ({ mentor }) => {
+const MentorBanner = () => {
   return (
     <div className="w-full bg-[#39B8AD]/5 py-20 lg:py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

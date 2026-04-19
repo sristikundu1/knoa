@@ -8,17 +8,27 @@ import {
   FaBriefcase,
   FaGraduationCap,
 } from "react-icons/fa";
+import {
+  HiBadgeCheck,
+  HiOutlineMail,
+  HiOutlineClipboardCheck,
+  HiOutlineUserGroup,
+  HiOutlineAcademicCap,
+} from "react-icons/hi";
 
 const MentorCard = ({ mentor }) => {
   const {
-    profileImage,
     name,
-    expertise,
+    profileImage,
+    subjects,
     bio,
+    status,
+    email,
     linkedin,
-    git,
-    rating,
-    experienceYears,
+    github,
+    certCount,
+    experience,
+    studentsCount,
   } = mentor;
 
   return (
@@ -35,93 +45,154 @@ const MentorCard = ({ mentor }) => {
             <div className="absolute bottom-0 left-0 w-[90%] h-[90%] border-l-[22px] border-b-[22px] border-[#0077b6] rounded-bl-[22px] z-0" />
 
             {/* The Image */}
-            <div className="relative z-10 overflow-hidden rounded-md shadow-2xl">
+            <div className="overflow-hidden rounded-md shadow-2xl">
               <img
                 src={profileImage}
                 alt={name}
                 className="w-full h-[500px] object-cover transition-transform duration-700 group-hover:scale-110"
               />
-
-              {/* Social Overlay: Hidden by default, slides up on hover */}
-              <div className="absolute inset-0  bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-8 gap-5">
-                {linkedin && (
-                  <motion.a
-                    whileHover={{ y: -5 }}
-                    href={linkedin}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-4 bg-white hover:bg-[#0077b5] hover:text-white rounded-full transition-all shadow-xl text-[#0077b5]"
-                  >
-                    <FaLinkedin size={24} />
-                  </motion.a>
-                )}
-                {git && (
-                  <motion.a
-                    whileHover={{ y: -5 }}
-                    href={git}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-4 bg-white hover:bg-black hover:text-white rounded-full transition-all shadow-xl text-black"
-                  >
-                    <FaGithub size={24} />
-                  </motion.a>
-                )}
-              </div>
             </div>
           </div>
         </div>
 
         {/* RIGHT SIDE: CONTENT */}
-        <div className="lg:w-3/5 p-4 flex flex-col justify-center space-y-6">
-          {/* Experience & Rating */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full text-[#0077b6] font-semibold text-sm">
-              <FaBriefcase />
-              <span>{experienceYears}+ Years Exp.</span>
+        <div className="lg:w-3/5 p-4 flex flex-col justify-center space-y-8">
+          {/* 1. Expertise Tags */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex flex-wrap gap-2"
+          >
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0077b6] bg-[#39B8AD]/10 px-3 py-1 rounded-md mb-2 block">
+              Expert In
+            </span>
+            <div className="w-full flex gap-2">
+              {subjects?.map((sub, i) => (
+                <span
+                  key={i}
+                  className="px-4 py-1.5 bg-slate-50 border border-slate-100 text-slate-600 rounded-lg text-xs font-bold shadow-sm"
+                >
+                  {sub}
+                </span>
+              ))}
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 rounded-full text-yellow-700 font-semibold text-sm">
-              <FaStar className="text-yellow-500" />
-              <span>{rating}.0 Rating</span>
+          </motion.div>
+
+          {/* 2. Name & Verified Badge */}
+          <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center gap-3"
+            >
+              <h2 className="text-5xl font-black text-[#03045e] capitalize">
+                {name}
+              </h2>
+              {status === "verified" && (
+                <div className="group relative">
+                  <HiBadgeCheck className="text-[#00b4d8] text-4xl" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#03045e] text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    Verified Expert
+                  </span>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Contact Quick-Links */}
+            <div className="flex items-center gap-4 pt-2">
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center gap-2 text-slate-400 hover:text-[#00b4d8] transition-colors text-sm font-medium"
+              >
+                <HiOutlineMail className="text-lg" /> {email}
+              </a>
+              <div className="h-4 w-[1px] bg-slate-200"></div>
+              <div className="flex gap-3">
+                {linkedin && (
+                  <a
+                    href={linkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-slate-400 hover:text-[#0077b5]"
+                  >
+                    <FaLinkedin size={18} />
+                  </a>
+                )}
+                {github && (
+                  <a
+                    href={github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-slate-400 hover:text-black"
+                  >
+                    <FaGithub size={18} />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Name & Expertise */}
-          <div>
-            <h2 className="text-5xl font-black text-[#03045e] mb-3">{name}</h2>
-            <p className="text-2xl font-medium text-[#00b4d8] flex items-center gap-3">
-              <FaGraduationCap /> {expertise}
+          {/* 3. Bio Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="relative"
+          >
+            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-[#39B8AD] to-transparent rounded-full opacity-30"></div>
+            <p className="text-slate-500 leading-relaxed text-lg font-medium italic pl-4">
+              "{bio}"
             </p>
-          </div>
+          </motion.div>
 
-          {/* Bio */}
-          <p className="text-gray-500 leading-relaxed text-xl italic max-w-2xl">
-            "{bio}"
-          </p>
-
-          {/* Statistics CountUp */}
-          <div className="grid grid-cols-3 gap-8 pt-10 border-t border-gray-100">
-            <div className="text-left">
+          {/* 4. Statistics Grid with Icons */}
+          <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-100">
+            {/* Certificates */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-[#39B8AD]">
+                <HiOutlineClipboardCheck size={20} />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Certificates
+                </span>
+              </div>
               <p className="text-4xl font-black text-[#03045e]">
-                <CountUp end={Number(experienceYears)} duration={3} />+
+                <CountUp end={Number(certCount)} duration={3} />
               </p>
-              <p className="text-sm uppercase tracking-widest text-gray-400 font-bold mt-1">
-                Years
+              <p className="text-xs text-slate-400 font-medium">
+                Professional Assets
               </p>
             </div>
-            <div className="text-left">
+
+            {/* Experience - Represented as Workshops/Years */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-[#00b4d8]">
+                <HiOutlineAcademicCap size={20} />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Experience
+                </span>
+              </div>
               <p className="text-4xl font-black text-[#03045e]">
-                <CountUp end={85} duration={4} />+
+                <CountUp end={Number(experience)} duration={3} />+
               </p>
-              <p className="text-sm uppercase tracking-widest text-gray-400 font-bold mt-1">
-                Projects
+              <p className="text-xs text-slate-400 font-medium">
+                Years in Industry
               </p>
             </div>
-            <div className="text-left">
+
+            {/* Students */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-[#03045e]">
+                <HiOutlineUserGroup size={20} />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Community
+                </span>
+              </div>
               <p className="text-4xl font-black text-[#03045e]">
-                <CountUp end={120} duration={4} />+
+                <CountUp end={Number(studentsCount)} duration={4} />
               </p>
-              <p className="text-sm uppercase tracking-widest text-gray-400 font-bold mt-1">
-                Students
+              <p className="text-xs text-slate-400 font-medium">
+                Active Students
               </p>
             </div>
           </div>

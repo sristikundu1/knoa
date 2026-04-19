@@ -105,38 +105,6 @@ async function run() {
       res.send(result);
     });
 
-    // mentors API
-
-    // get the data from database
-    app.get("/mentors", async (req, res) => {
-      const result = await mentorCollection.find().toArray();
-      res.send(result);
-    });
-
-    // insert mentor data if exist then update mentor data
-    app.post("/mentors", async (req, res) => {
-      mentorData = req.body;
-
-      const query = { email: mentorData.email };
-
-      const updatedDoc = {
-        $set: {
-          ...mentorData,
-          updatedAt: new Date(),
-        },
-      };
-
-      // If user exists, update them. If not, create them.
-      const options = { upsert: true };
-
-      const result = await mentorCollection.updateOne(
-        query,
-        updatedDoc,
-        options,
-      );
-      res.send(result);
-    });
-
     // course API
 
     // get the data from database
@@ -224,32 +192,75 @@ async function run() {
     });
 
     // mentor API handle
-    // Get a single mentor's details by their ID
-    app.get("/users/mentor/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await userCollection.findOne(query);
-      res.send(result);
-    });
 
-    // Get ONLY users who are mentors (for your Mentors Page)
+    // Get all mentors from db
     app.get("/mentors", async (req, res) => {
-      // const query = { role: "mentor" }; // Filter by role
       const result = await mentorCollection.find().toArray();
       res.send(result);
     });
 
-    // related Mentor
-    app.get("/related-mentors", async (req, res) => {
-      const { expertise, currentId } = req.query;
-      const query = {
-        role: "mentor",
-        expertise: { $regex: expertise, $options: "i" },
-        _id: { $ne: new ObjectId(currentId) },
+    // Get a single mentor's details by their ID
+    app.get("/mentor-details/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      // find the main mentor
+      const mentor = await mentorCollection.findOne(query);
+
+      if (!mentor) {
+        return res.status(404).send({ message: "mentor not found!" });
+      }
+
+      // find related mentor
+
+      const relatedQuery = {
+        _id: { $ne: new ObjectId(id) },
+        status: "verified",
+        subjects: { $in: mentor.subjects },
       };
-      const related = await userCollection.find(query).limit(3).toArray();
-      res.send(related);
+      const relatedMentors = await mentorCollection
+        .find(relatedQuery)
+        .limit(4)
+        .toArray();
+
+      res.send({ mentor, relatedMentors });
     });
+
+    // insert mentor data if exist then update mentor data
+    app.post("/mentors", async (req, res) => {
+      mentorData = req.body;
+
+      const query = { email: mentorData.email };
+
+      const updatedDoc = {
+        $set: {
+          ...mentorData,
+          updatedAt: new Date(),
+        },
+      };
+
+      // If user exists, update them. If not, create them.
+      const options = { upsert: true };
+
+      const result = await mentorCollection.updateOne(
+        query,
+        updatedDoc,
+        options,
+      );
+      res.send(result);
+    });
+
+    // related Mentor
+    // app.get("/related-mentors", async (req, res) => {
+    //   const { expertise, currentId } = req.query;
+    //   const query = {
+    //     role: "mentor",
+    //     expertise: { $regex: expertise, $options: "i" },
+    //     _id: { $ne: new ObjectId(currentId) },
+    //   };
+    //   const related = await userCollection.find(query).limit(3).toArray();
+    //   res.send(related);
+    // });
 
     // dashboard API
 
@@ -311,6 +322,8 @@ async function run() {
       res.send(result);
     });
 
+    // subscribe related API
+
     // API for newsletter subscribers
     app.post("/subscribers", async (req, res) => {
       const subscriber = req.body;
@@ -345,31 +358,7 @@ async function run() {
       res.send(result);
     });
 
-    // AI chat
-    app.post("/chat", async (req, res) => {
-      const { message } = req.body;
-
-      try {
-        // Choose the model (gemini-1.5-flash is fast and free)
-        const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-flash",
-          systemInstruction:
-            "You are a helpful assistant for an online learning platform. Keep responses concise.",
-        });
-
-        const result = await model.generateContent(message);
-        const response = await result.response;
-        const text = response.text();
-
-        console.log("Gemini says:", text);
-        res.send({ reply: text }); // This matches your frontend 'data.reply'
-      } catch (error) {
-        console.error("Gemini Error:", error);
-        res.status(500).send({ error: "Gemini failed to respond" });
-      }
-    });
-
-    // Payment related API
+    // enrollment related API
 
     // STUDENT ROUTE: Get only my courses
     app.get("/my-enrollments/:email", async (req, res) => {
@@ -380,7 +369,7 @@ async function run() {
       res.send(result);
     });
 
-    // MENTOR ROUTE: Get students for my courses specifically
+    // MENTOR ROUTE: Get students count and info for mentor courses specifically
     app.get("/mentor/course-stats/:mentorUid", async (req, res) => {
       const { mentorUid } = req.params;
 
@@ -437,6 +426,8 @@ async function run() {
       const result = await enrollmentCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
+
+    // Payment related API
 
     app.post("/verify-payment", async (req, res) => {
       const sessionId = req.body.sessionId;
@@ -514,6 +505,30 @@ async function run() {
       });
 
       res.send({ url: session.url });
+    });
+
+    // AI chat
+    app.post("/chat", async (req, res) => {
+      const { message } = req.body;
+
+      try {
+        // Choose the model (gemini-1.5-flash is fast and free)
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          systemInstruction:
+            "You are a helpful assistant for an online learning platform. Keep responses concise.",
+        });
+
+        const result = await model.generateContent(message);
+        const response = await result.response;
+        const text = response.text();
+
+        console.log("Gemini says:", text);
+        res.send({ reply: text }); // This matches your frontend 'data.reply'
+      } catch (error) {
+        console.error("Gemini Error:", error);
+        res.status(500).send({ error: "Gemini failed to respond" });
+      }
     });
 
     // Send a ping to confirm a successful connection
