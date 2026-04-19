@@ -207,10 +207,10 @@ const Routes = createBrowserRouter([
         path: "/dashboard/fav-courses",
         element: <FavoriteCourse></FavoriteCourse>,
       },
-      // {
-      //   path: "/dashboard/profile",
-      //   element: <Profile></Profile>,
-      // },
+      {
+        path: "/dashboard/profile",
+        element: <Profile></Profile>,
+      },
     ],
   },
 ]);

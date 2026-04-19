@@ -63,7 +63,7 @@ const RelatedMentors = ({ mentor: relatedMentors }) => {
 
                 {/* Action Footer */}
                 <div className="card-footer">
-                  <Link to={`/mentor-details/${m._id}`} className="details-btn">
+                  <Link to={`/mentor/${m._id}`} className="details-btn">
                     <span>View Expert Profile</span>
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path

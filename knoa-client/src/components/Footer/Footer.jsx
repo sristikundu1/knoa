@@ -103,7 +103,7 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col gap-4">
-          <h6 className="text-[#39b8ad] font-bold uppercase tracking-widest text-xs mb-2">
+          <h6 className="text-[#0077b6] font-bold uppercase tracking-widest text-xs mb-2">
             Student Resources
           </h6>
           <div className="flex flex-col gap-3 text-sm text-gray-400">

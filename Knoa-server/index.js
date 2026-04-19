@@ -80,7 +80,7 @@ async function run() {
       res.send(result);
     });
 
-    // update user role in db
+    // ADMIN: update user role in db
     app.patch("/users/role/:id", async (req, res) => {
       const id = req.params.id;
       const { role } = req.body;
@@ -89,6 +89,20 @@ async function run() {
       const updatedDoc = {
         $set: {
           role: role,
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    // USER: update info
+    app.patch("/users/:email", async (req, res) => {
+      const { role, ...otherData } = req.body;
+      const filter = { email: req.params.email };
+      const updatedDoc = {
+        $set: {
+          ...otherData,
         },
       };
 
@@ -168,28 +182,21 @@ async function run() {
       res.send(result);
     });
 
-    // get the user data according to email from database
-    // app.get("/users/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const user = await userCollection.findOne({ email: email });
-    //   res.send(user);
-    // });
-
     // update user info
-    app.patch("/users/:email", async (req, res) => {
-      const email = req.params.email;
-      const updatedInfo = req.body;
-      // Remove sensitive fields if they exist in the body
-      delete updatedInfo._id;
-      delete updatedInfo.email;
+    // app.patch("/users/:email", async (req, res) => {
+    //   const email = req.params.email;
+    //   const updatedInfo = req.body;
+    //   // Remove sensitive fields if they exist in the body
+    //   delete updatedInfo._id;
+    //   delete updatedInfo.email;
 
-      const filter = { email: email };
-      const updateDoc = {
-        $set: updatedInfo,
-      };
-      const result = await userCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+    //   const filter = { email: email };
+    //   const updateDoc = {
+    //     $set: updatedInfo,
+    //   };
+    //   const result = await userCollection.updateOne(filter, updateDoc);
+    //   res.send(result);
+    // });
 
     // mentor API handle
 
@@ -249,18 +256,6 @@ async function run() {
       );
       res.send(result);
     });
-
-    // related Mentor
-    // app.get("/related-mentors", async (req, res) => {
-    //   const { expertise, currentId } = req.query;
-    //   const query = {
-    //     role: "mentor",
-    //     expertise: { $regex: expertise, $options: "i" },
-    //     _id: { $ne: new ObjectId(currentId) },
-    //   };
-    //   const related = await userCollection.find(query).limit(3).toArray();
-    //   res.send(related);
-    // });
 
     // dashboard API
 

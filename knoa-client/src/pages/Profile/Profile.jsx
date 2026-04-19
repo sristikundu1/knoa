@@ -1,205 +1,262 @@
-import React, { use, useEffect, useState } from "react";
-import { AuthContext } from "../../contexts/AuthContext";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  FaUserGraduate,
-  FaChalkboardTeacher,
-  FaEnvelope,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaExternalLinkAlt,
-} from "react-icons/fa";
+  HiOutlineMail,
+  HiOutlineShieldCheck,
+  HiOutlineFingerPrint,
+  HiOutlineColorSwatch,
+  HiOutlineLightningBolt,
+  HiOutlineBadgeCheck,
+} from "react-icons/hi";
 import { Link } from "react-router"; // Use 'react-router-dom' if 'react-router' doesn't work for your version
+import useAuth from "../../hooks/UseAuth";
+import useRole from "../../hooks/useRole";
+import styled from "styled-components";
+import Swal from "sweetalert2";
+import { updateProfile, updateEmail, updatePassword } from "firebase/auth";
+import EditProfileModal from "./EditProfileModal";
 
 const Profile = () => {
-  const { user, loading: authLoading } = use(AuthContext);
-  const [myCourses, setMyCourses] = useState([]);
+  const { user } = useAuth();
+  const { role } = useRole();
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (user?.email) {
-      const endpoint =
-        user?.role === "mentor"
-          ? `https://knoa-server.vercel.app/courses-by-mentor?email=${user.email}`
-          : `https://knoa-server.vercel.app/my-enrolled-courses?email=${user.email}`;
+  // Color mapping based on role for a personalized feel
+  const roleStyles = {
+    admin: {
+      bg: "bg-rose-50",
+      text: "text-rose-600",
+      border: "border-rose-100",
+      label: "System Administrator",
+    },
+    mentor: {
+      bg: "bg-teal-50",
+      text: "text-teal-600",
+      border: "border-teal-100",
+      label: "Expert Mentor",
+    },
+    student: {
+      bg: "bg-blue-50",
+      text: "text-blue-600",
+      border: "border-blue-100",
+      label: "Active Learner",
+    },
+  };
 
-      fetch(endpoint)
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch courses");
-          return res.json();
-        })
-        .then((data) => {
-          setMyCourses(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error:", err);
-          setLoading(false);
-        });
-    }
-  }, [user]);
-
-  if (authLoading || loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="w-12 h-12 border-4 border-slate-200 border-t-[#39B8AD] rounded-full animate-spin"></div>
-        <p className="text-slate-400 font-medium animate-pulse">
-          Loading profile data...
-        </p>
-      </div>
-    );
-  }
+  const currentStyle = roleStyles[role] || roleStyles.student;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-5xl mx-auto space-y-8 pb-10 pt-10"
-    >
-      {/* --- Profile Header Card --- */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="h-40 bg-[#03045e] relative">
-          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    <StyledWrapper>
+      <div className="min-h-screen bg-[#FDFEFF] pb-20">
+        {/* 1. Pattern Header Section */}
+        <div className="h-48 w-full bg-pattern relative overflow-hidden">
+          {/* Animated Glow Overlay */}
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
+            transition={{ duration: 20, repeat: Infinity }}
+            className="absolute -top-20 -right-20 w-96 h-96 bg-[#00b4da] rounded-full blur-[120px] opacity-40 z-10"
+          />
+
+          {/* Subtle Texture Overlay */}
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 z-0"></div>
         </div>
 
-        <div className="px-8 pb-10">
-          <div className="relative -top-16 flex flex-col md:flex-row items-end gap-6">
-            <img
-              src={user?.photoURL || "https://via.placeholder.com/150"}
-              alt="Profile"
-              className="w-40 h-40 rounded-3xl border-[6px] border-white shadow-xl object-cover bg-slate-50"
-            />
-            <div className="flex-1 pb-4">
-              <div className="flex items-center gap-3">
-                <h1 className="text-4xl font-black text-slate-800 tracking-tight">
-                  {user?.displayName}
-                </h1>
-                {user?.role === "mentor" ? (
-                  <span className="bg-purple-100 text-purple-600 p-1.5 rounded-lg text-sm">
-                    <FaChalkboardTeacher />
-                  </span>
-                ) : (
-                  <span className="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-sm">
-                    <FaUserGraduate />
-                  </span>
-                )}
-              </div>
-              <p className="text-[#39B8AD] font-bold uppercase text-xs tracking-[0.2em] mt-1">
-                Official {user?.role || "Member"}
-              </p>
-            </div>
-            <Link
-              to="/dashboard/update-profile"
-              className="mb-4 px-8 py-3 bg-[#03045e] text-white rounded-2xl font-bold text-sm hover:bg-[#00b4d8] transition-all shadow-lg shadow-blue-900/10 inline-block"
-            >
-              Edit Details
-            </Link>
-          </div>
-
-          {/* --- Information Grid --- */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-2">
-            <div className="group p-6 rounded-2xl bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
-              <FaEnvelope
-                className="text-slate-300 group-hover:text-[#00b4d8] mb-3 transition-colors"
-                size={20}
-              />
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
-                Email
-              </p>
-              <p className="text-slate-700 font-bold break-all">
-                {user?.email}
-              </p>
-            </div>
-
-            <div className="group p-6 rounded-2xl bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
-              <FaPhone
-                className="text-slate-300 group-hover:text-[#00b4d8] mb-3 transition-colors"
-                size={20}
-              />
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
-                Phone
-              </p>
-              <p className="text-slate-700 font-bold">
-                {user?.phone || "Not Provided"}
-              </p>
-            </div>
-
-            <div className="group p-6 rounded-2xl bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
-              <FaMapMarkerAlt
-                className="text-slate-300 group-hover:text-[#00b4d8] mb-3 transition-colors"
-                size={20}
-              />
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
-                Location
-              </p>
-              <p className="text-slate-700 font-bold">Dhaka, Bangladesh</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* --- Course Section --- */}
-      <div className="bg-white p-10 rounded-[2rem] border border-slate-100 shadow-sm">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-2xl font-black text-[#03045e]">
-            {user?.role === "mentor"
-              ? "Your Published Courses"
-              : "Your Learning Path"}
-          </h3>
-          <span className="px-4 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-500">
-            {myCourses.length} Total
-          </span>
-        </div>
-
-        {myCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {myCourses.map((course) => (
-              <motion.div
-                whileHover={{ y: -5 }}
-                key={course._id}
-                className="bg-white rounded-3xl border border-slate-100 p-2 shadow-sm hover:shadow-md transition-all"
-              >
-                {/* Fixed: Use course.courseImage and course.courseName to match your Enrollment object */}
+        <div className="max-w-4xl mx-auto px-6">
+          {/* 2. Main Profile Header Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative -mt-24 bg-white rounded-[3rem] p-8 shadow-2xl shadow-blue-900/5 border border-slate-50 flex flex-col md:flex-row items-center gap-8 z-20"
+          >
+            <div className="relative">
+              <div className="w-40 h-40 rounded-[2.5rem] overflow-hidden border-8 border-white shadow-xl">
                 <img
-                  src={course.courseImage || course.image || course.thumbnail}
-                  alt=""
-                  className="w-full h-40 rounded-[1.5rem] object-cover"
+                  src={
+                    user?.photoURL ||
+                    "https://i.ibb.co/v3687L8/default-avatar.png"
+                  }
+                  alt="Profile"
+                  className="w-full h-full object-cover"
                 />
-                <div className="p-4">
-                  <h4 className="font-bold text-slate-800 leading-tight h-10 line-clamp-2">
-                    {course.courseName || course.name}
-                  </h4>
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-lg font-black text-[#00b4d8]">
-                      ${course.price}
-                    </span>
-                    <Link
-                      to={`/dashboard/course/${course.courseId}`}
-                      className="p-2 bg-slate-50 text-slate-400 hover:text-[#03045e] hover:bg-blue-50 rounded-xl transition-all"
-                    >
-                      <FaExternalLinkAlt size={14} />
-                    </Link>
-                  </div>
-                </div>
+              </div>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="absolute -bottom-2 -right-2 bg-white p-2 rounded-2xl shadow-lg border border-slate-100"
+              >
+                <HiOutlineBadgeCheck
+                  className={`text-3xl ${currentStyle.text}`}
+                />
               </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="py-20 text-center rounded-[2rem] border-2 border-dashed border-slate-100">
-            <p className="text-slate-300 font-medium italic">
-              No course activity found yet.
-            </p>
-            <Link
-              to="/dashboard/all-courses"
-              className="mt-4 inline-block text-sm font-bold text-[#39B8AD] hover:underline"
+            </div>
+
+            <div className="text-center md:text-left space-y-2">
+              <div
+                className={`inline-flex items-center gap-2 px-4 py-1 rounded-full border ${currentStyle.bg} ${currentStyle.border} ${currentStyle.text} text-[10px] font-black uppercase tracking-widest`}
+              >
+                <HiOutlineLightningBolt /> {currentStyle.label}
+              </div>
+              <h1 className="text-4xl font-black text-[#03045e] tracking-tight">
+                {user?.displayName || "Anonymous User"}
+              </h1>
+              <p className="text-slate-400 font-medium flex items-center justify-center md:justify-start gap-2">
+                <HiOutlineMail /> {user?.email}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* 3. Stats & Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50"
             >
-              Browse Library
-            </Link>
+              <h3 className="text-[#03045e] font-black text-lg mb-6 flex items-center gap-3">
+                <HiOutlineFingerPrint className="text-[#00b4da]" />{" "}
+                Identification
+              </h3>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-50">
+                  <span className="text-slate-400 text-sm font-bold uppercase tracking-tighter">
+                    User Role
+                  </span>
+                  <span
+                    className={`font-black capitalize ${currentStyle.text}`}
+                  >
+                    {role}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400 text-sm font-bold uppercase tracking-tighter">
+                    Member Since
+                  </span>
+                  <span className="text-slate-600 font-mono text-xs">
+                    {user?.metadata?.creationTime
+                      ? new Date(user.metadata.creationTime).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
+                      : "User since 2026"}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-[#03045E] p-8 rounded-[3rem] text-white flex flex-col justify-between"
+            >
+              <div>
+                <HiOutlineColorSwatch
+                  size={40}
+                  className="text-[#00b4da] mb-4"
+                />
+                <h3 className="text-2xl font-bold">
+                  Customize <br /> Your Experience
+                </h3>
+                <p className="text-blue-200/60 text-sm mt-2">
+                  Update preferences and visibility settings.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="mt-8 w-full py-4 bg-[#00b4da] hover:bg-white hover:text-[#03045E] text-white font-black rounded-2xl transition-all active:scale-95 shadow-lg"
+              >
+                Edit Account Details
+              </button>
+            </motion.div>
+            {/* 4. Edit Modal Integration */}
+            <AnimatePresence>
+              {isModalOpen && (
+                <EditProfileModal
+                  user={user}
+                  onClose={() => setIsModalOpen(false)}
+                />
+              )}
+            </AnimatePresence>
           </div>
-        )}
+
+          {/* 4. Footer */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-10 p-8 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 text-center"
+          >
+            <p className="text-slate-500 font-bold italic">
+              Logged in as {currentStyle.label}
+            </p>
+          </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </StyledWrapper>
   );
 };
+
+const StyledWrapper = styled.div`
+  .bg-pattern {
+    /* Height and width are handled by Tailwind's h-48 w-full */
+    --u: 10px;
+    --c1: #fbf9fe;
+    --c2: #02b6e7;
+    --c3: #00699b;
+    --gp: 50% / calc(var(--u) * 16.8) calc(var(--u) * 12.9);
+    background:
+      conic-gradient(
+          from 122deg at 50% 85.15%,
+          var(--c2) 0 58deg,
+          var(--c3) 0 116deg,
+          #fff0 0 100%
+        )
+        var(--gp),
+      conic-gradient(from 122deg at 50% 72.5%, var(--c1) 0 116deg, #fff0 0 100%)
+        var(--gp),
+      conic-gradient(from 58deg at 82.85% 50%, var(--c3) 0 64deg, #fff0 0 100%)
+        var(--gp),
+      conic-gradient(
+          from 58deg at 66.87% 50%,
+          var(--c1) 0 64deg,
+          var(--c2) 0 130deg,
+          #fff0 0 100%
+        )
+        var(--gp),
+      conic-gradient(from 238deg at 17.15% 50%, var(--c2) 0 64deg, #fff0 0 100%)
+        var(--gp),
+      conic-gradient(
+          from 172deg at 33.13% 50%,
+          var(--c3) 0 66deg,
+          var(--c1) 0 130deg,
+          #fff0 0 100%
+        )
+        var(--gp),
+      linear-gradient(98deg, var(--c3) 0 15%, #fff0 calc(15% + 1px) 100%)
+        var(--gp),
+      linear-gradient(-98deg, var(--c2) 0 15%, #fff0 calc(15% + 1px) 100%)
+        var(--gp),
+      conic-gradient(
+          from -58deg at 50.25% 14.85%,
+          var(--c3) 0 58deg,
+          var(--c2) 0 116deg,
+          #fff0 0 100%
+        )
+        var(--gp),
+      conic-gradient(
+          from -58deg at 50% 28.125%,
+          var(--c1) 0 116deg,
+          #fff0 0 100%
+        )
+        var(--gp),
+      linear-gradient(90deg, var(--c2) 0 50%, var(--c3) 0 100%) var(--gp);
+  }
+`;
 
 export default Profile;

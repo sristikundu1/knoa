@@ -40,8 +40,8 @@ const UserProfile = ({ user, handleLogOut }) => {
           </Link>
         </li>
         <li>
-          <Link to="/profile" className="py-2">
-            Settings
+          <Link to="/dashboard/profile" className="py-2">
+            Profile
           </Link>
         </li>
         <div className="divider my-0"></div>
