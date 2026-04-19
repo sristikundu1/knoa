@@ -31,6 +31,8 @@ import StudentCourses from "../pages/StudentCourses/StudentCourses";
 import MyEnrollments from "../pages/Dashboard/StudentDashBoard/MyEnrollments";
 import PaymentSuccess from "../pages/Dashboard/StudentDashBoard/PaymentSuccess";
 import EnrollmentManagement from "../pages/Dashboard/AdminDashboard/EnrollmentManagement";
+import MentorEnrollments from "../pages/Dashboard/MentorDashboard/MentorEnrollments";
+import Subscribers from "../pages/Dashboard/AdminDashboard/Subscribers";
 
 const Routes = createBrowserRouter([
   {
@@ -143,6 +145,10 @@ const Routes = createBrowserRouter([
           fetch(`https://knoa-server.vercel.app/course/${params.id}`),
       },
       {
+        path: "/dashboard/enrolled-students",
+        element: <MentorEnrollments></MentorEnrollments>,
+      },
+      {
         path: "/dashboard/manage-enrollment",
         element: <EnrollmentManagement></EnrollmentManagement>,
       },
@@ -153,6 +159,10 @@ const Routes = createBrowserRouter([
       {
         path: "/dashboard/payment-success",
         element: <PaymentSuccess></PaymentSuccess>,
+      },
+      {
+        path: "/dashboard/subscribers",
+        element: <Subscribers></Subscribers>,
       },
       {
         path: "wishlist",

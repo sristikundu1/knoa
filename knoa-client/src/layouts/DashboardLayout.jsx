@@ -2,13 +2,14 @@ import React from "react";
 import { Link, Outlet } from "react-router";
 import DashboardNav from "../components/Dashboard/DashboardNav";
 import useRole from "../hooks/useRole";
-import { RiBookShelfFill } from "react-icons/ri";
+import { RiBookShelfFill, RiMailUnreadLine } from "react-icons/ri";
 import { LuUsers } from "react-icons/lu";
 import { BiSolidBookAdd } from "react-icons/bi";
 import useAuth from "../hooks/UseAuth";
 import { HiOutlineLogout } from "react-icons/hi";
 import { FaUserCog, FaUserGraduate } from "react-icons/fa";
 import { HiOutlineCheckBadge } from "react-icons/hi2";
+import { FaBookOpenReader } from "react-icons/fa6";
 
 const Dashboard = () => {
   const { role } = useRole();
@@ -115,6 +116,18 @@ const Dashboard = () => {
                     </span>
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    to={"/dashboard/subscribers"}
+                    className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Subscribers"
+                  >
+                    <RiMailUnreadLine size={20} />
+                    <span className="text-sm font-medium is-drawer-close:hidden">
+                      Subscribers
+                    </span>
+                  </Link>
+                </li>
               </>
             )}
 
@@ -139,6 +152,19 @@ const Dashboard = () => {
               <>
                 <li>
                   <Link
+                    to={"/dashboard/update-profile"}
+                    className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Update Profile"
+                  >
+                    <FaUserCog size={20} />
+                    <span className="text-sm font-medium is-drawer-close:hidden">
+                      Update Profile
+                    </span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     to={"/dashboard/add-course"}
                     className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Add Course"
@@ -149,16 +175,15 @@ const Dashboard = () => {
                     </span>
                   </Link>
                 </li>
-
                 <li>
                   <Link
-                    to={"/dashboard/update-profile"}
+                    to={"/dashboard/enrolled-students"}
                     className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Update Profile"
+                    data-tip="Enrolled Students"
                   >
-                    <FaUserCog size={20} />
+                    <FaBookOpenReader size={20} />
                     <span className="text-sm font-medium is-drawer-close:hidden">
-                      Update Profile
+                      Enrolled Students
                     </span>
                   </Link>
                 </li>

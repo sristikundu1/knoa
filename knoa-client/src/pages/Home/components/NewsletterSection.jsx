@@ -1,57 +1,57 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "framer-motion"; // Add 'npm install framer-motion'
 import { MdAddCircle, MdNotificationsActive } from "react-icons/md";
 import { FiCheckCircle } from "react-icons/fi";
-import Swal from "sweetalert2"; // You are already using this!
+import Swal from "sweetalert2";
+import emailjs from "@emailjs/browser";
+import useAxiosSecure from "./../../../hooks/useAxiosSecure";
 
 const NewsletterSection = () => {
   const [email, setEmail] = useState("");
+  const axiosSEcure = useAxiosSecure();
   const [loading, setLoading] = useState(false);
+  const emailRef = useRef();
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
+    const email = emailRef.current.value;
+
+    if (!email) return;
+
     setLoading(true);
 
-    // Dynamic data to send to MongoDB
-    const subscriberData = {
-      email: email,
-      subscribedAt: new Date().toISOString(),
-      source: "HomePage Section", // Or 'Dashboard Bottom'
-      status: "active",
-    };
+    const res = await axiosSEcure.post("/subscribers", { email });
 
-    // --- Dynamic Backend Integration ---
-    fetch("https://knoa-server.vercel.app/subscribers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(subscriberData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setLoading(false);
-        if (data.insertedId) {
+    if (res.data.insertedId) {
+      // Send the Email via EmailJS
+      const serviceID = import.meta.env.VITE_serviceID;
+      const templateID = import.meta.env.VITE_templateID;
+      const publicKey = import.meta.env.VITE_publicKey;
+
+      const templateParams = {
+        user_email: email,
+        message:
+          "Welcome to our learning community! You've successfully subscribed to our newsletter.",
+      };
+
+      emailjs
+        .send(serviceID, templateID, templateParams, publicKey)
+        .then(() => {
+          setLoading(false);
+          // Professional Success Feedback
           Swal.fire({
-            title: "Added Successfully!",
-            text: "You will now receive our creative updates.",
+            title: "Subscribed!",
+            text: "Check your inbox for a welcome message.",
             icon: "success",
-            timer: 2500,
-            showConfirmButton: false,
-            // Customizing SweetAlert for an "eye-soothing" look
-            iconColor: "#00b4d8", // Your custom teal/green theme
-            background: "#ffffff",
+            confirmButtonColor: "#00b4d8",
           });
-          setEmail(""); // Clear the input
-        }
-      })
-      .catch((err) => {
-        setLoading(false);
-        console.error("Subscription Error:", err);
-        Swal.fire({
-          icon: "error",
-          title: "Failed to Subscribe",
-          text: "Something went wrong. Please try again.",
+          emailRef.current.value = ""; // Clear input
+        })
+        .catch((err) => {
+          setLoading(false);
+          console.error("Email Error:", err);
         });
-      });
+    }
   };
 
   return (
@@ -112,9 +112,8 @@ const NewsletterSection = () => {
         >
           <input
             required
+            ref={emailRef}
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address"
             className="flex-grow w-full px-6 py-4 bg-transparent text-slate-700 font-semibold placeholder:text-slate-300 placeholder:font-bold focus:outline-none focus:ring-2 focus:ring-[#39b8ad]/30 rounded-full text-lg"
           />
@@ -128,7 +127,7 @@ const NewsletterSection = () => {
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
               <>
-                Sign Up
+                Subscribe
                 <span className="transform group-hover:translate-x-1 transition-transform">
                   →
                 </span>

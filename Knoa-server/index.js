@@ -283,7 +283,7 @@ async function run() {
     });
 
     // dashboard API
-    // Add this route to your Express server
+
     app.get("/stats/overview", async (req, res) => {
       const totalCourses = await courseCollection.countDocuments();
       const totalMentors = await userCollection.countDocuments({
@@ -353,13 +353,28 @@ async function run() {
       const alreadySubscribed = await subscriberCollection.findOne(query);
 
       if (alreadySubscribed) {
-        return res
-          .status(400)
-          .send({ message: "This email is already subscribed!" });
+        return res.status(400).send({ message: "Already subscribed!" });
       }
 
       // 2. Insert the new dynamic subscriber data
-      const result = await subscriberCollection.insertOne(subscriber);
+      const result = await subscriberCollection.insertOne({
+        subscriber,
+        subscribedAt: new Date(),
+      });
+      res.send(result);
+    });
+
+    //  GET: Admin view all subscribers
+    app.get("/subscribers", async (req, res) => {
+      const result = await subscriberCollection.find().toArray();
+      res.send(result);
+    });
+
+    // delete subscriber
+    app.delete("/subscribers/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await subscriberCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -399,12 +414,39 @@ async function run() {
     });
 
     // MENTOR ROUTE: Get students for my courses specifically
-    app.get("/mentor/enrollments/:uid", async (req, res) => {
-      const uid = req.params.uid; // Matches the "qQsvCTx..." UID
+    app.get("/mentor/course-stats/:mentorUid", async (req, res) => {
+      const { mentorUid } = req.params;
+
       const result = await enrollmentCollection
-        .find({ instructorId: uid })
+        .aggregate([
+          {
+            $match: {
+              instructorId: mentorUid,
+              status: "completed",
+            },
+          },
+          {
+            $group: {
+              _id: "$courseId",
+              courseName: { $first: "$courseName" },
+              courseImage: { $first: "$courseImage" },
+              price: { $first: "$price" },
+              totalStudents: { $sum: 1 },
+            },
+          },
+        ])
         .toArray();
-      res.send(result);
+
+      // total students calculation from grouped result
+      const totalStudents = result.reduce(
+        (acc, course) => acc + course.totalStudents,
+        0,
+      );
+
+      res.send({
+        courses: result,
+        totalStudents,
+      });
     });
 
     // ADMIN ROUTE : get everything for  management
