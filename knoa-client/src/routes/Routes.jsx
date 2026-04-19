@@ -33,6 +33,7 @@ import PaymentSuccess from "../pages/Dashboard/StudentDashBoard/PaymentSuccess";
 import EnrollmentManagement from "../pages/Dashboard/AdminDashboard/EnrollmentManagement";
 import MentorEnrollments from "../pages/Dashboard/MentorDashboard/MentorEnrollments";
 import Subscribers from "../pages/Dashboard/AdminDashboard/Subscribers";
+import FavoriteCourse from "../pages/Dashboard/StudentDashBoard/FavoriteCourse";
 
 const Routes = createBrowserRouter([
   {
@@ -165,8 +166,8 @@ const Routes = createBrowserRouter([
         element: <Subscribers></Subscribers>,
       },
       {
-        path: "wishlist",
-        element: <FavCourses></FavCourses>,
+        path: "/dashboard/fav-courses",
+        element: <FavoriteCourse></FavoriteCourse>,
       },
       {
         path: "/dashboard/profile",

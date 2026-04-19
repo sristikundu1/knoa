@@ -1,6 +1,6 @@
 import React, { use, useEffect } from "react";
 import { CiSearch } from "react-icons/ci";
-import { IoIosNotifications } from "react-icons/io";
+import { IoIosArrowForward, IoIosNotifications } from "react-icons/io";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate, useRouteLoaderData } from "react-router";
 
@@ -17,20 +17,7 @@ const DashboardNav = () => {
         className="btn btn-square btn-ghost"
       >
         {/* Sidebar toggle icon */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          strokeWidth="2"
-          fill="none"
-          stroke="currentColor"
-          className="my-1.5 inline-block size-4"
-        >
-          <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path>
-          <path d="M9 4v16"></path>
-          <path d="M14 10l2 2l-2 2"></path>
-        </svg>
+        <IoIosArrowForward size={20} />
       </label>
       {/* 1. Search Section (Remains the same) */}
       <div className="flex-1">

@@ -37,12 +37,6 @@ async function run() {
     const userCollection = client.db("KnoaDB").collection("users");
     const mentorCollection = client.db("KnoaDB").collection("mentors");
     const enrollmentCollection = client.db("KnoaDB").collection("enrollment");
-    const FAvCourseCollection = client
-      .db("KnoaDB")
-      .collection("wishlistCourse");
-    // const enrollmentCollection = client
-    //   .db("KnoaDB")
-    //   .collection("enrolledCourse");
     const subscriberCollection = client.db("KnoaDB").collection("subscribers");
 
     // API for user
@@ -206,31 +200,6 @@ async function run() {
       res.send(result);
     });
 
-    // wishlist API
-
-    // Updated GET route with sorting (Newest first)
-    app.get("/wishlist", async (req, res) => {
-      const result = await FAvCourseCollection.find()
-        .sort({ _id: -1 })
-        .toArray();
-      res.send(result);
-    });
-
-    // post wishlist courses to the database
-    app.post("/wishlist", async (req, res) => {
-      const wishCourse = req.body;
-      const result = await FAvCourseCollection.insertOne(wishCourse);
-      res.send(result);
-    });
-
-    // delete the course from the wishlist
-    app.delete("/wishlist/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await FAvCourseCollection.deleteOne(query);
-      res.send(result);
-    });
-
     // get the user data according to email from database
     // app.get("/users/:email", async (req, res) => {
     //   const email = req.params.email;
@@ -300,7 +269,7 @@ async function run() {
       res.send({ totalCourses, totalMentors, highRatedMentors });
     });
 
-    // enrollcourse API
+    // enrollCourse API
     app.post("/enroll", async (req, res) => {
       const enrolledCourse = req.body;
       // 1. Double check for existing enrollment
@@ -343,8 +312,6 @@ async function run() {
     });
 
     // API for newsletter subscribers
-    // Inside your server connection block
-
     app.post("/subscribers", async (req, res) => {
       const subscriber = req.body;
 

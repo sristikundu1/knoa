@@ -10,6 +10,7 @@ import { HiOutlineLogout } from "react-icons/hi";
 import { FaUserCog, FaUserGraduate } from "react-icons/fa";
 import { HiOutlineCheckBadge } from "react-icons/hi2";
 import { FaBookOpenReader } from "react-icons/fa6";
+import { TfiBookmarkAlt } from "react-icons/tfi";
 
 const Dashboard = () => {
   const { role } = useRole();
@@ -84,6 +85,18 @@ const Dashboard = () => {
                     <HiOutlineCheckBadge size={20} />
                     <span className="text-sm font-medium is-drawer-close:hidden">
                       My Enrollments
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to={"/dashboard/fav-courses"}
+                    className="flex items-center gap-3 py-2 px-3 rounded-lg text-[#03045e] hover:bg-blue-50 hover:text-[#00b4d8] transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip=" Fav Courses"
+                  >
+                    <TfiBookmarkAlt size={20} />
+                    <span className="text-sm font-medium is-drawer-close:hidden">
+                      Favorite Courses
                     </span>
                   </Link>
                 </li>

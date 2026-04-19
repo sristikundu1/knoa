@@ -9,9 +9,11 @@ import {
 import { FaHeart, FaStar } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { Link } from "react-router";
+import { addCourseId } from "../../../utils/localStorage";
 
 const CourseCard = ({ course }) => {
   const {
+    _id,
     isFree,
     thumbnail,
     courseName,
@@ -22,48 +24,10 @@ const CourseCard = ({ course }) => {
     rating,
   } = course;
 
-  const { _id, ...courseWithoutId } = course;
-  const handleWishlist = (e) => {
-    e.preventDefault();
-    e.stopPropagation(); // Prevents the card click if you have one
-
-    // 1. Prepare the data: Keep the original ID as 'courseId'
-    const wishlistData = {
-      ...course,
-      courseId: course._id, // Save the original ID here!
-      // studentEmail: user?.email, // Best practice: link it to the current user
-      addedAt: new Date().toISOString(),
-    };
-
-    // 2. Remove the MongoDB _id so it doesn't conflict during insertion
-    delete wishlistData._id;
-
-    fetch("https://knoa-server.vercel.app/wishlist", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(wishlistData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.insertedId) {
-          Swal.fire({
-            title: "Added to Wishlist!",
-            text: `${courseName} is now in your favorites.`,
-            icon: "success",
-            timer: 2000,
-            showConfirmButton: false,
-            // Using your theme colors for the icon
-            iconColor: "#39b8ad",
-          });
-        }
-      })
-      .catch((err) => {
-        console.error("Error adding to wishlist:", err);
-        Swal.fire("Error", "Could not add to wishlist", "error");
-      });
+  const handleWishCourse = (_id) => {
+    addCourseId(_id);
   };
+
   return (
     <StyledWrapper>
       <div className="card">
@@ -72,7 +36,10 @@ const CourseCard = ({ course }) => {
 
         <div className="card__content">
           {/* Row 1: Wishlist Icon (Hidden by default, slides in on hover) */}
-          <div className="card__wishlist" onClick={handleWishlist}>
+          <div
+            className="card__wishlist"
+            onClick={() => handleWishCourse(_id.toString())}
+          >
             <HiOutlineHeart className="wishlist default" size={18} />
             <FaHeart className="wishlist hover" size={18} />
           </div>

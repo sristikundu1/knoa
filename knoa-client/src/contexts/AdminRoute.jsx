@@ -1,20 +1,21 @@
-import React, { use } from "react";
-import { AuthContext } from "./AuthContext";
-import { Navigate, useLocation } from "react-router";
+import React from "react";
 import Loading from "../pages/Loading/Loading";
+import useRole from "../hooks/useRole";
+import useAuth from "../hooks/UseAuth";
 
 const AdminRoute = ({ children }) => {
-  const { user, loading } = use(AuthContext);
-  const location = useLocation();
+  const { user, loading } = useAuth();
+  const { role, roleLoading } = useRole();
 
-  if (loading) {
+  if (loading || roleLoading) {
     return <Loading></Loading>;
   }
 
-  if (user && user.role === "Admin") {
-    return children;
+  if (role !== "admin") {
+    return;
   }
-  return <Navigate to="/dashboard" state={{ from: location }} replace />;
+
+  return children;
 };
 
 export default AdminRoute;
