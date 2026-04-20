@@ -35,6 +35,7 @@ const verifyFBToken = async (req, res, next) => {
     return res.status(401).send({ message: "unauthorized access" });
   }
 };
+
 app.get("/", (req, res) => {
   res.send("Learning is on!");
 });
@@ -73,10 +74,23 @@ async function run() {
       }
       next();
     };
+    const verifyRole = (...allowedRoles) => {
+      return async (req, res, next) => {
+        const email = req.decoded_email;
+        const query = { email };
 
+        const user = await userCollection.findOne(query);
+
+        if (!user || !allowedRoles.includes(user.role)) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+
+        next();
+      };
+    };
     // API for user
     // get all the user data from database
-    app.get("/users", verifyFBToken, verifyAdmin, async (req, res) => {
+    app.get("/users", verifyFBToken, verifyRole("admin"), async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -151,13 +165,18 @@ async function run() {
     });
 
     // delete user from db
-    app.delete("/users/:id", verifyFBToken, verifyAdmin, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
+    app.delete(
+      "/users/:id",
+      verifyFBToken,
+      verifyRole("admin"),
+      async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
 
-      const result = await userCollection.deleteOne(query);
-      res.send(result);
-    });
+        const result = await userCollection.deleteOne(query);
+        res.send(result);
+      },
+    );
 
     // course API
 
@@ -200,27 +219,38 @@ async function run() {
     });
 
     // update course details
-    app.patch("/course/:id", verifyFBToken, verifyAdmin, async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
+    app.patch(
+      "/course/:id",
+      verifyFBToken,
+      verifyRole("admin", "mentor"),
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
 
-      // Create a copy of the body and remove _id if it exists
-      const updatedCourse = { ...req.body };
-      delete updatedCourse._id;
+        // Create a copy of the body and remove _id if it exists
+        const updatedCourse = { ...req.body };
+        delete updatedCourse._id;
 
-      const updateDoc = {
-        $set: updatedCourse,
-      };
-      const result = await courseCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+        const updateDoc = {
+          $set: updatedCourse,
+        };
+        const result = await courseCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      },
+    );
 
-    app.delete("/course/:id", verifyFBToken, verifyAdmin, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await courseCollection.deleteOne(query);
-      res.send(result);
-    });
+    // delete course from db
+    app.delete(
+      "/course/:id",
+      verifyFBToken,
+      verifyRole("admin", "mentor"),
+      async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await courseCollection.deleteOne(query);
+        res.send(result);
+      },
+    );
 
     // mentor API handle
 
@@ -242,6 +272,11 @@ async function run() {
         return res.status(404).send({ message: "mentor not found!" });
       }
 
+      // 2. Fetch courses specifically for this mentor
+      // We use the mentor's Firebase UID to match the mentorUid in the courses collection
+      const mentorCourses = await courseCollection
+        .find({ mentorUid: mentor.uid })
+        .toArray();
       // find related mentor
 
       const relatedQuery = {
@@ -254,32 +289,37 @@ async function run() {
         .limit(4)
         .toArray();
 
-      res.send({ mentor, relatedMentors });
+      res.send({ mentor, courses: mentorCourses, relatedMentors });
     });
 
     // insert mentor data if exist then update mentor data
-    app.post("/mentors", verifyFBToken, async (req, res) => {
-      mentorData = req.body;
+    app.post(
+      "/mentors",
+      verifyFBToken,
+      verifyRole("mentor"),
+      async (req, res) => {
+        mentorData = req.body;
 
-      const query = { email: mentorData.email };
+        const query = { email: mentorData.email };
 
-      const updatedDoc = {
-        $set: {
-          ...mentorData,
-          updatedAt: new Date(),
-        },
-      };
+        const updatedDoc = {
+          $set: {
+            ...mentorData,
+            updatedAt: new Date(),
+          },
+        };
 
-      // If user exists, update them. If not, create them.
-      const options = { upsert: true };
+        // If user exists, update them. If not, create them.
+        const options = { upsert: true };
 
-      const result = await mentorCollection.updateOne(
-        query,
-        updatedDoc,
-        options,
-      );
-      res.send(result);
-    });
+        const result = await mentorCollection.updateOne(
+          query,
+          updatedDoc,
+          options,
+        );
+        res.send(result);
+      },
+    );
 
     // dashboard API
 
@@ -336,19 +376,19 @@ async function run() {
     });
 
     // for mentor profile
-    app.get(
-      "/courses-by-mentor",
-      verifyFBToken,
-      verifyAdmin,
-      async (req, res) => {
-        const name = req.query.name;
+    // app.get(
+    //   "/courses-by-mentor",
+    //   verifyFBToken,
+    //   verifyAdmin,
+    //   async (req, res) => {
+    //     const name = req.query.name;
 
-        // We search the main courseCollection for courses this mentor created
-        const query = { mentorName: name };
-        const result = await courseCollection.find(query).toArray();
-        res.send(result);
-      },
-    );
+    //     // We search the main courseCollection for courses this mentor created
+    //     const query = { mentorName: name };
+    //     const result = await courseCollection.find(query).toArray();
+    //     res.send(result);
+    //   },
+    // );
 
     // subscribe related API
 
@@ -373,16 +413,21 @@ async function run() {
     });
 
     //  GET: Admin view all subscribers
-    app.get("/subscribers", verifyFBToken, verifyAdmin, async (req, res) => {
-      const result = await subscriberCollection.find().toArray();
-      res.send(result);
-    });
+    app.get(
+      "/subscribers",
+      verifyFBToken,
+      verifyRole("admin"),
+      async (req, res) => {
+        const result = await subscriberCollection.find().toArray();
+        res.send(result);
+      },
+    );
 
     // delete subscriber
     app.delete(
       "/subscribers/:id",
       verifyFBToken,
-      verifyAdmin,
+      verifyRole("admin"),
       async (req, res) => {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
@@ -406,7 +451,7 @@ async function run() {
     app.get(
       "/mentor/course-stats/:mentorUid",
       verifyFBToken,
-      verifyAdmin,
+      verifyRole("admin", "mentor"),
       async (req, res) => {
         const { mentorUid } = req.params;
 
@@ -447,7 +492,7 @@ async function run() {
     app.get(
       "/admin/enrollments",
       verifyFBToken,
-      verifyAdmin,
+      verifyRole("admin"),
       async (req, res) => {
         const result = await enrollmentCollection.find().toArray();
         res.send(result);
@@ -458,7 +503,7 @@ async function run() {
     app.patch(
       "/enrollments/:id",
       verifyFBToken,
-      verifyAdmin,
+      verifyRole("admin"),
       async (req, res) => {
         const id = req.params.id;
         const filter = { _id: new ObjectId(id) };

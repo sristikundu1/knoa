@@ -6,7 +6,7 @@ import Loading from "../../Loading/Loading";
 import MentorCourseCard from "./MentorCourseCard";
 
 const MentorEnrollments = () => {
-  const { user } = useAuth(); // Logged in Mentor
+  const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
 
   const { data, isLoading } = useQuery({

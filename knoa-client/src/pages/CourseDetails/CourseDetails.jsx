@@ -14,6 +14,7 @@ import { FaChalkboardTeacher } from "react-icons/fa";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../Loading/Loading";
+import { HiOutlineCheckCircle } from "react-icons/hi";
 
 const CourseDetails = () => {
   const axiosSecure = useAxiosSecure();
@@ -72,7 +73,7 @@ const CourseDetails = () => {
       initial="hidden"
       animate="visible"
       variants={containerVars}
-      className="min-h-screen bg-[#f8fafc] pb-20"
+      className=" min-h-screen bg-white pb-20"
     >
       {/* Main Wrapper Grid */}
       <div className="max-w-7xl mx-auto px-4 pt-32">
@@ -265,61 +266,63 @@ const Accordion = ({ html }) => {
       {sections.map((section, secIndex) => (
         <div key={secIndex}>
           {/* Section Title */}
-          <h3 className="text-lg font-bold text-[#03045e] mb-2">
+          <h3 className="text-2xl font-bold text-[#03045e] mb-2">
             {section.title}
           </h3>
 
           {/* Lessons */}
-          {section.lessons.map((lesson, i) => {
-            const index = `${secIndex}-${i}`;
-            const isOpen = openIndex === index;
+          <div className="border border-2 border-[#00b4d8] rounded-lg p-4">
+            {section.lessons.map((lesson, i) => {
+              const index = `${secIndex}-${i}`;
+              const isOpen = openIndex === index;
 
-            return (
-              <div
-                key={index}
-                className="border border-slate-200 rounded-2xl bg-white overflow-hidden mb-2"
-              >
-                <button
-                  onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full p-4 flex justify-between items-center hover:bg-slate-50"
+              return (
+                <div
+                  key={index}
+                  className="border border-slate-200 rounded-2xl bg-white overflow-hidden mb-2"
                 >
-                  <span className="font-semibold text-[#03045e] text-sm">
-                    {lesson.title}
-                  </span>
-                  {isOpen ? (
-                    <FiMinus className="text-[#00b4d8]" />
-                  ) : (
-                    <FiPlus className="text-[#00b4d8]" />
-                  )}
-                </button>
+                  <button
+                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                    className="w-full p-4 flex justify-between items-center hover:bg-slate-50"
+                  >
+                    <span className="font-semibold text-[#03045e] text-sm">
+                      {lesson.title}
+                    </span>
+                    {isOpen ? (
+                      <FiMinus className="text-[#00b4d8]" />
+                    ) : (
+                      <FiPlus className="text-[#00b4d8]" />
+                    )}
+                  </button>
 
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden px-5 pb-4 bg-slate-50"
-                    >
-                      {lesson.content && (
-                        <p className="text-sm text-slate-600 py-2 whitespace-pre-wrap break-words">
-                          {lesson.content}
-                        </p>
-                      )}
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden px-5 pb-4 bg-slate-50"
+                      >
+                        {lesson.content && (
+                          <p className="text-sm text-slate-600 py-2 whitespace-pre-wrap break-words">
+                            {lesson.content}
+                          </p>
+                        )}
 
-                      {lesson.image && (
-                        <img
-                          src={lesson.image}
-                          alt={lesson.title}
-                          className="rounded-xl mt-2 max-h-64 object-cover w-full  max-w-full "
-                        />
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
+                        {lesson.image && (
+                          <img
+                            src={lesson.image}
+                            alt={lesson.title}
+                            className="rounded-xl mt-2 max-h-64 object-cover w-full  max-w-full "
+                          />
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ))}
     </div>

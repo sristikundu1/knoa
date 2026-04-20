@@ -13,7 +13,6 @@ import CourseDetails from "../pages/CourseDetails/CourseDetails";
 import EditCourse from "../pages/EditCourse/EditCourse";
 import Contact from "../pages/Contact/Contact";
 import FAQ from "../pages/FAQ/FAQ";
-import FavCourses from "./../pages/FavCourses/FavCourses";
 import PrivateRoute from "./PrivateRoute";
 import Polices from "./../pages/Polices/Polices";
 import MernRoadmap from "./../pages/MernRoadmap/MernRoadmap";
@@ -115,8 +114,6 @@ const Routes = createBrowserRouter([
         <DashboardLayout></DashboardLayout>
       </PrivateRoute>
     ),
-    id: "dashboard-data",
-    loader: () => fetch("https://knoa-server.vercel.app/wishlist"),
     children: [
       {
         index: true,

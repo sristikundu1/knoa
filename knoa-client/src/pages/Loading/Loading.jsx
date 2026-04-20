@@ -5,7 +5,7 @@ const Loading = () => {
   return (
     <div className="min-h-screen flex justify-center items-center">
       <div className=" mx-auto mb-6">
-        <div className="animate-spin rounded-full h-18 w-18 border-t-8 border-b-8 border-[#39B8AD] mb-4"></div>
+        <div className="animate-spin rounded-full h-18 w-18 border-t-8 border-b-8 border-[#0077b6] mb-4"></div>
         {/* <Lottie animationData={loading} loop={true} /> */}
       </div>
     </div>
