@@ -337,7 +337,7 @@ const StyledWrapper = styled.div`
   }
 `;
 
-// --- INTERACTIVE WRAPPER ---
+// --- INTERACTIVE WRAPPER for clock ---
 const InteractiveCard = ({ children, color }) => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);

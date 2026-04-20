@@ -626,7 +626,7 @@ async function run() {
 
     // Dashboard API
     // GET: STUDENT info
-    app.get("/student-stats/:email", async (req, res) => {
+    app.get("/student-stats/:email", verifyFBToken, async (req, res) => {
       const email = req.params.email;
 
       // 1. Get all enrollments for this specific student
@@ -662,38 +662,97 @@ async function run() {
     });
 
     // GET: MENTOR info
-    app.get("/mentor-stats/:uid", async (req, res) => {
-      const uid = req.params.uid;
+    app.get(
+      "/mentor-stats/:uid",
+      verifyFBToken,
+      verifyRole("mentor"),
+      async (req, res) => {
+        const uid = req.params.uid;
 
-      // 1. Fetch all courses created by this mentor
-      const myCourses = await courseCollection
-        .find({ mentorUid: uid })
-        .toArray();
+        // 1. Fetch all courses created by this mentor
+        const myCourses = await courseCollection
+          .find({ mentorUid: uid })
+          .toArray();
 
-      // 2. Fetch all enrollments where this mentor is the instructor
-      const enrollments = await enrollmentCollection
-        .find({ instructorId: uid })
-        .toArray();
+        // 2. Fetch all enrollments where this mentor is the instructor
+        const enrollments = await enrollmentCollection
+          .find({ instructorId: uid })
+          .toArray();
 
-      // 3. Calculate Total Revenue (Only from completed/approved payments)
-      const totalRevenue = enrollments
-        .filter((en) => en.status === "completed")
-        .reduce((sum, current) => sum + (current.price || 0), 0);
+        // 3. Calculate Total Revenue (Only from completed/approved payments)
+        const totalRevenue = enrollments
+          .filter((en) => en.status === "completed")
+          .reduce((sum, current) => sum + (current.price || 0), 0);
 
-      // 4. Calculate Unique Total Students
-      const totalStudents = new Set(enrollments.map((en) => en.studentEmail))
-        .size;
+        // 4. Calculate Unique Total Students
+        const totalStudents = new Set(enrollments.map((en) => en.studentEmail))
+          .size;
 
-      res.send({
-        stats: {
-          totalRevenue,
-          totalStudents,
-          totalCourses: myCourses.length,
-        },
-        courses: myCourses, // Full list for the dashboard table
-        recentEnrollments: enrollments.slice(-5), // Optional: for activity feeds
-      });
-    });
+        res.send({
+          stats: {
+            totalRevenue,
+            totalStudents,
+            totalCourses: myCourses.length,
+          },
+          courses: myCourses, // Full list for the dashboard table
+          recentEnrollments: enrollments.slice(-5), // Optional: for activity feeds
+        });
+      },
+    );
+
+    // GET: ADMIN info
+    app.get(
+      "/admin-analytics",
+      verifyFBToken,
+      verifyRole("admin"),
+      async (req, res) => {
+        try {
+          // 1. Total Subscribers from subscriberCollection
+          const totalSubscribers = await subscriberCollection.countDocuments();
+
+          // 2. Total Users from userCollection
+          const totalUsers = await userCollection.countDocuments();
+
+          // Fetch users, sorted by newest first
+          const users = await userCollection
+            .find({})
+            .sort({ creationTime: -1 })
+            .limit(10) // Limits to top 10 for dashboard performance
+            .toArray();
+
+          // 3. Total Mentors (Users where role is 'mentor')
+          const totalMentors = await userCollection.countDocuments({
+            role: "mentor",
+          });
+
+          const regularUsers = totalUsers - totalMentors;
+
+          // 4. Enrollment Stats (Pending vs Delivered Revenue)
+          const enrollments = await enrollmentCollection.find({}).toArray();
+
+          const pendingApprovals = enrollments.filter(
+            (en) => en.status === "pending",
+          ).length;
+
+          // 5. Total Revenue (Only where status is 'delivered')
+          const totalRevenue = enrollments
+            .filter((en) => en.status === "completed")
+            .reduce((sum, current) => sum + (current.price || 0), 0);
+
+          res.status(200).send({
+            totalSubscribers,
+            totalUsers,
+            users,
+            totalMentors,
+            regularUsers,
+            pendingApprovals,
+            totalRevenue,
+          });
+        } catch (error) {
+          res.status(500).send({ message: "Analytics fetch failed", error });
+        }
+      },
+    );
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
