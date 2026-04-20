@@ -19,6 +19,7 @@
     "framer-motion": "^12.38.0",
     "lottie-react": "^2.4.1",
     "react": "^19.1.1",
+    "react-calendar": "^6.0.1",
     "react-countup": "^6.5.3",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.72.1",

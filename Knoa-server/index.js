@@ -624,6 +624,43 @@ async function run() {
       }
     });
 
+    // Dashboard API
+    // GET: STUDENT info
+    app.get("/student-stats/:email", async (req, res) => {
+      const email = req.params.email;
+
+      // 1. Get all enrollments for this specific student
+      const enrollments = await enrollmentCollection
+        .find({ studentEmail: email })
+        .toArray();
+
+      // 2. Count statuses for StatCards
+      const paidAndDone = enrollments.filter(
+        (e) => e.status === "completed",
+      ).length;
+      const pendingApproval = enrollments.filter(
+        (e) => e.status === "pending",
+      ).length;
+
+      // 3. Get total mentors count (where role is 'mentor')
+      const totalMentorsCount = await userCollection.countDocuments({
+        role: "mentor",
+      });
+
+      // 4. Get a list of mentors to show in the table
+      const mentorList = await mentorCollection.find().limit(5).toArray();
+
+      res.send({
+        stats: {
+          paidAndDone,
+          pendingApproval,
+          totalMentors: totalMentorsCount,
+        },
+        enrollments, // Full array for the course list column
+        mentors: mentorList, // Full array for the mentor list column
+      });
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log(
