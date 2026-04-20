@@ -661,6 +661,40 @@ async function run() {
       });
     });
 
+    // GET: MENTOR info
+    app.get("/mentor-stats/:uid", async (req, res) => {
+      const uid = req.params.uid;
+
+      // 1. Fetch all courses created by this mentor
+      const myCourses = await courseCollection
+        .find({ mentorUid: uid })
+        .toArray();
+
+      // 2. Fetch all enrollments where this mentor is the instructor
+      const enrollments = await enrollmentCollection
+        .find({ instructorId: uid })
+        .toArray();
+
+      // 3. Calculate Total Revenue (Only from completed/approved payments)
+      const totalRevenue = enrollments
+        .filter((en) => en.status === "completed")
+        .reduce((sum, current) => sum + (current.price || 0), 0);
+
+      // 4. Calculate Unique Total Students
+      const totalStudents = new Set(enrollments.map((en) => en.studentEmail))
+        .size;
+
+      res.send({
+        stats: {
+          totalRevenue,
+          totalStudents,
+          totalCourses: myCourses.length,
+        },
+        courses: myCourses, // Full list for the dashboard table
+        recentEnrollments: enrollments.slice(-5), // Optional: for activity feeds
+      });
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log(

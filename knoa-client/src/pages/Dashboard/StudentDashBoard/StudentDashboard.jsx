@@ -51,7 +51,7 @@ const StatItem = ({ icon, label, value, color }) => (
   </motion.div>
 );
 
-const StudentDashboard = ({ serverData }) => {
+const StudentDashboard = () => {
   const [wishCourse, setWishCourse] = useState(getFavCourse());
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();

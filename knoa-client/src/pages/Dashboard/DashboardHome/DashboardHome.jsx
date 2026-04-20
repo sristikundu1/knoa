@@ -92,7 +92,7 @@ const DashboardHome = () => {
   return (
     <div>
       {role === "admin" && <AdminDashboard></AdminDashboard>}{" "}
-      {role === "admin" && <MentorDashboard></MentorDashboard>}{" "}
+      {role === "mentor" && <MentorDashboard></MentorDashboard>}{" "}
       {role === "student" && <StudentDashboard></StudentDashboard>}
     </div>
   );
