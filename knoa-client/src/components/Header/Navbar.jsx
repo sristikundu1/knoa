@@ -1,14 +1,14 @@
-import React, { useState, use } from "react";
+import React, { useState } from "react";
 import { Link, NavLink } from "react-router";
-import { AuthContext } from "../../contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMenuAlt3, HiOutlineLogout, HiX } from "react-icons/hi";
 import Swal from "sweetalert2";
 import UserProfile from "./UserProfile";
 import useRole from "./../../hooks/useRole";
+import useAuth from "../../hooks/UseAuth";
 
 const Navbar = () => {
-  const { logOut, user } = use(AuthContext);
+  const { logOut, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const { role } = useRole();
 
@@ -84,7 +84,7 @@ const Navbar = () => {
         {/* End: Auth Actions */}
         <div className="navbar-end gap-4">
           {user ? (
-            <UserProfile user={user} handleLogOut={handleLogOut} />
+            <UserProfile user={user} role={role} handleLogOut={handleLogOut} />
           ) : (
             <Link
               to="/auth/register"

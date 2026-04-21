@@ -10,39 +10,21 @@ import { useLoaderData, useNavigate } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import useAuth from "../../hooks/UseAuth";
-import { useForm } from "react-hook-form";
+import { useForm, Watch } from "react-hook-form";
 
 const EditCourse = () => {
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  // const {
-  //   _id,
-  //   courseName,
-  //   category,
-  //   difficulty,
-  //   duration,
-  //   rating,
-  //   mentorName,
-  //   shortDescription,
-  //   fullDescription,
-  //   tag,
-  //   language,
-  //   price,
-  //   isFree: initialIsFree,
-  //   thumbnail,
-  //   video,
-  // } = useLoaderData();
-  const loaderData = useLoaderData();
-  const { _id, fullDescription, isFree: initialIsFree } = loaderData;
+
+  const { course } = useLoaderData();
+  const { _id, fullDescription, isFree: initialIsFree } = course || {};
   const navigate = useNavigate();
   const [isFree, setIsFree] = useState(initialIsFree || false);
   const [description, setDescription] = useState(fullDescription || "");
 
   // 1. Initialize React Hook Form with default values from loaderData
-  const { register, handleSubmit, setValue } = useForm({
-    defaultValues: loaderData,
-  });
+  const { register, handleSubmit, reset } = useForm();
 
   // Toolbar configuration to keep the UI clean
   const modules = {
@@ -81,6 +63,17 @@ const EditCourse = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (course) {
+      reset(course);
+
+      setDescription(course.fullDescription || "");
+      setIsFree(course.isFree || false);
+    }
+  }, [course, reset]);
+  // console.log("loaderData:", loaderData);
+  // const isChanged = JSON.stringify(loaderData) !== JSON.stringify(Watch());
 
   // handle publish course button
   // React Hook Form Submit Handler

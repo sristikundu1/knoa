@@ -30,7 +30,8 @@ const AllCourses = () => {
   // 2. Simple Filter Logic
   const displayCourses = courses.filter((course) => {
     const categoryMatch =
-      category === "All" || course.category === category.toLowerCase();
+      category === "All" ||
+      course.category.toLowerCase() === category.toLowerCase();
     const levelMatch = level === "All Course" || course.difficulty === level;
 
     let priceMatch = false;
@@ -70,7 +71,7 @@ const AllCourses = () => {
             "Design",
             "Development",
             "data-science",
-            "IT & Software",
+            "IT-and-Software",
           ]}
           activeItem={category}
           onSelect={setCategory}

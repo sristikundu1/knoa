@@ -3,18 +3,19 @@ import { Link, useLoaderData, useParams } from "react-router";
 import MentorBanner from "./MentorBanner";
 import MentorCard from "./MentorCard";
 import RelatedMentors from "./Relatedmentors";
-import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../Loading/Loading";
+import useAxios from "../../hooks/useAxios";
 
 const MentorDetails = () => {
-  const axiosSecure = useAxiosSecure();
+  const axiosPublic = useAxios();
+
   const { id } = useParams();
 
   const { data, isLoading } = useQuery({
     queryKey: ["mentor-details", id],
     queryFn: async () => {
-      const res = await axiosSecure.get(`/mentor-details/${id}`);
+      const res = await axiosPublic.get(`/mentor-details/${id}`);
 
       return res.data;
     },

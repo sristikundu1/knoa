@@ -12,7 +12,7 @@ const AdministrativeRoute = ({ children, allowedRoles }) => {
     return <Loading></Loading>;
   }
 
-  if (!allowedRoles.includes(user.role)) {
+  if (!user || !allowedRoles.includes(role)) {
     return <Forbidden></Forbidden>;
   }
 

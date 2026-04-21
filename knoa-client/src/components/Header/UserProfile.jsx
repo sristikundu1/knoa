@@ -2,7 +2,7 @@ import React from "react";
 import { HiOutlineLogout } from "react-icons/hi";
 import { Link } from "react-router";
 
-const UserProfile = ({ user, handleLogOut }) => {
+const UserProfile = ({ user, handleLogOut, role }) => {
   return (
     <div className="dropdown dropdown-end">
       <div
@@ -31,7 +31,7 @@ const UserProfile = ({ user, handleLogOut }) => {
             {user?.displayName?.split(" ")[0]}
           </p>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-            {user?.role || "Student"}
+            {role || "Student"}
           </p>
         </div>
         <li>

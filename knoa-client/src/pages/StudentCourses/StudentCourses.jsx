@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../Loading/Loading";
 import CourseCard from "../Home/components/CourseCard";
 import CourseFilter from "../Courses/components/CourseFilter";
+import useAxios from "../../hooks/useAxios";
 
 const StudentCourses = () => {
-  const axiosSecure = useAxiosSecure();
+  const axiosPublic = useAxios();
 
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["courses"],
     queryFn: async () => {
-      const res = await axiosSecure.get("/courses");
+      const res = await axiosPublic.get("/courses");
       return res.data;
     },
   });

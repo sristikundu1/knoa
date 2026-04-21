@@ -10,7 +10,11 @@ const port = process.env.PORT || 3000;
 
 const admin = require("firebase-admin");
 
-const serviceAccount = require("./knoa-firebase-adminsdk.json");
+// const serviceAccount = require("./knoa-firebase-adminsdk.json");
+const decoded = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString(
+  "utf8",
+);
+const serviceAccount = JSON.parse(decoded);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -64,20 +68,12 @@ async function run() {
     const subscriberCollection = client.db("KnoaDB").collection("subscribers");
 
     // middleware admin before allowing admin activity with database access must be after verifyFBToken
-    const verifyAdmin = async (req, res, next) => {
-      const email = req.decoded_email;
-      const query = { email };
-      const user = await userCollection.findOne(query);
 
-      if (!user || user.role !== "admin") {
-        return res.status(401).send({ message: "forbidden access" });
-      }
-      next();
-    };
     const verifyRole = (...allowedRoles) => {
       return async (req, res, next) => {
         const email = req.decoded_email;
         const query = { email };
+        console.log(query, email);
 
         const user = await userCollection.findOne(query);
 
@@ -133,7 +129,7 @@ async function run() {
     app.patch(
       "/users/role/:id",
       verifyFBToken,
-      verifyAdmin,
+      verifyRole("admin"),
       async (req, res) => {
         const id = req.params.id;
         const { role } = req.body;
@@ -323,22 +319,6 @@ async function run() {
 
     // dashboard API
 
-    app.get("/stats/overview", async (req, res) => {
-      const totalCourses = await courseCollection.countDocuments();
-      const totalMentors = await userCollection.countDocuments({
-        role: "mentor",
-      });
-
-      // Filter mentors with rating >= 4.0 and limit to top 3
-      const highRatedMentors = await userCollection
-        .find({ role: "mentor", rating: { $gte: 4.0 } })
-        .sort({ rating: -1 })
-        .limit(3)
-        .toArray();
-
-      res.send({ totalCourses, totalMentors, highRatedMentors });
-    });
-
     // enrollCourse API
     app.post("/enroll", async (req, res) => {
       const enrolledCourse = req.body;
@@ -374,21 +354,6 @@ async function run() {
       const result = await enrollmentCollection.find(query).toArray();
       res.send(result);
     });
-
-    // for mentor profile
-    // app.get(
-    //   "/courses-by-mentor",
-    //   verifyFBToken,
-    //   verifyAdmin,
-    //   async (req, res) => {
-    //     const name = req.query.name;
-
-    //     // We search the main courseCollection for courses this mentor created
-    //     const query = { mentorName: name };
-    //     const result = await courseCollection.find(query).toArray();
-    //     res.send(result);
-    //   },
-    // );
 
     // subscribe related API
 

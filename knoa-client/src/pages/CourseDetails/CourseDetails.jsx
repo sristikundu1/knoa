@@ -1,5 +1,5 @@
 import React, { use, useEffect, useState } from "react";
-import { useLoaderData, Link, useParams } from "react-router";
+import { useLoaderData, Link, useParams, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiCheckCircle,
@@ -11,13 +11,14 @@ import {
 import { AuthContext } from "../../contexts/AuthContext";
 import Swal from "sweetalert2";
 import { FaChalkboardTeacher } from "react-icons/fa";
-import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../Loading/Loading";
 import { HiOutlineCheckCircle } from "react-icons/hi";
+import useAxios from "../../hooks/useAxios";
 
 const CourseDetails = () => {
-  const axiosSecure = useAxiosSecure();
+  const axiosPublic = useAxios();
+  const navigate = useNavigate();
   const { user } = use(AuthContext);
   const { id } = useParams();
   const [isEnrolling, setIsEnrolling] = useState(false);
@@ -26,7 +27,7 @@ const CourseDetails = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["course", id],
     queryFn: async () => {
-      const res = await axiosSecure.get(`/course/${id}`);
+      const res = await axiosPublic.get(`/course/${id}`);
       return res.data;
     },
   });
@@ -38,6 +39,19 @@ const CourseDetails = () => {
 
   // --- Enrollment Logic ---
   const handleEnroll = async () => {
+    if (!user) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Required",
+        text: "Please log in to enroll in this course",
+        confirmButtonText: "Go to Login",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/auth/login"); // redirect to login page
+        }
+      });
+      return;
+    }
     setIsEnrolling(true);
 
     const enrollmentData = {

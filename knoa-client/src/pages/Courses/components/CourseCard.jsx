@@ -124,7 +124,7 @@ const CourseCard = ({ course }) => {
 
           <div className="flex gap-4">
             <Link
-              to={`/dashboard/course/${course._id}`}
+              to={`/course/${course._id}`}
               className="mt-4 flex items-center gap-2 text-white font-bold px-3 py-1 rounded-full bg-[#00b4d8] text-[0.8rem]"
             >
               View Course <FaArrowAltCircleRight />

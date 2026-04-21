@@ -25,7 +25,6 @@ const DashboardNav = () => {
   });
   const mentorCourses = data?.courses || [];
   const totalOverallStudents = data?.totalStudents || 0;
-  console.log(totalOverallStudents);
 
   // 3. Admin Payment Query (For Admin)
   const { data: allPayments = [], refetch } = useQuery({
@@ -138,7 +137,7 @@ const DashboardNav = () => {
                 {user?.displayName}
               </p>
               <p className="text-[11px] font-medium text-[#00b4d8] mt-1 uppercase tracking-wider">
-                {user?.role || "User"}
+                {role || "Student"}
               </p>
             </div>
 

@@ -3,17 +3,20 @@ import CourseCard from "./CourseCard";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../../Loading/Loading";
+import useAxios from "../../../hooks/useAxios";
 
 const Courses = () => {
-  const axiosSecure = useAxiosSecure();
+  const axiosPublic = useAxios();
 
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["courses"],
     queryFn: async () => {
-      const res = await axiosSecure.get("/courses");
+      const res = await axiosPublic.get("/courses");
       return res.data;
     },
   });
+
+  console.log(courses);
 
   if (isLoading) return <Loading></Loading>;
   return (

@@ -4,7 +4,7 @@ import useAuth from "./UseAuth";
 import { useNavigate } from "react-router";
 
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:3000/",
+  baseURL: "https://knoa-server.vercel.app",
 });
 
 const useAxiosSecure = () => {

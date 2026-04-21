@@ -205,14 +205,14 @@ const Dashboard = () => {
           </ul>
 
           {/* Bottom Section (Matching DashboardLeft style) */}
-          <div className="w-full p-2 border-t border-slate-50">
+          <div className="w-full p-2 border-t border-slate-100">
             <li>
               <button
                 onClick={handleLogOut}
-                className="flex items-center gap-3 py-2 px-3 rounded-lg text-red-400 hover:bg-red-50 transition-all w-full is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                className="flex items-center gap-3 py-2 px-3 rounded-lg text-red-400 hover:bg-red-50 transition-all is-drawer-close:justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Logout"
               >
-                <HiOutlineLogout size={20} />
+                <HiOutlineLogout size={25} />
                 <span className="text-sm font-medium is-drawer-close:hidden">
                   Logout
                 </span>

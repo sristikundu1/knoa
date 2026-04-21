@@ -1,59 +1,130 @@
-🎓 Knoa | Modern Learning Management System
-Knoa is a comprehensive, AI-integrated MERN stack platform designed to bridge the gap between expert mentors and aspiring developers. Featuring robust role-based access control, secure authentication, and a sleek, eye-soothing UI.
+# 🎓Knoa — Scalable Online Learning Platform
 
-Live Site URL: https://knoa-d9d9c.web.app/ (Replace with your actual Firebase/Vercel URL)
+Knoa is a full-stack, production-ready learning management platform designed to connect students, mentors, and administrators through a secure, role-based ecosystem. The system supports course lifecycle management, controlled enrollment workflows, and monetization through integrated payment processing.
 
-🚀 Key Features
-🔐 Authentication & Security
-Multi-Method Login: Secure authentication using Google OAuth or Email/Password via Firebase.
+---
 
-Identity Verification: Compulsory email verification to ensure a high-quality student community.
+## 🌐 Live Application
 
-Password Management: Full "Forgot Password" flow with secure reset links.
+🔗 https://knoa-d9d9c.web.app/
 
-Private Infrastructure: Protected routes using React Router to ensure sensitive data is only accessible to authorized users.
+---
 
-👥 Role-Based Functionality (RBAC)
-The platform dynamically changes based on the logged-in user's role:
+## 🔐 Admin Access (Demo Only)
 
-Student: Browse courses, manage wishlists, access certificates, and track progress.
+> This access is strictly for demonstration and evaluation purposes.
 
-Mentor: Manage course content, interact with students, and view teaching analytics.
+- **Email:** platformadmin@gmail.com
+- **Password:** Admin@1234
 
-Admin: Full platform oversight, user role management, and system-wide configurations.
+---
 
-💡 Admin Preview: To explore all administrative features, use the secret admin bypass code: KnoaAdmin2026.
+## 🧩 System Overview
 
-📊 Advanced Tools
-Interactive Analytics: Visual data representation using Recharts for tracking student growth and course popularity.
+Knoa is built with a modular architecture that separates concerns across authentication, authorization, course management, and payment workflows.
 
-AI Support: Integrated chat assistance to help students with real-time queries.
+The platform enforces **strict role-based access control (RBAC)** across three primary user types:
 
-Student Resources: Dedicated roadmap, interview prep guides, and certificate verification system.
+- **Admin** — System governance and approval authority
+- **Mentor** — Content creation and revenue tracking
+- **Student** — Course consumption and enrollment
 
-🛠️ Tech Stack
-Frontend:
+---
 
-React 19: Component-based UI library.
+## 🚀 Core Capabilities
 
-React Router Dom: For seamless SPA navigation.
+### Authentication & Authorization
 
-Styled Components: For high-performance, scoped CSS.
+- Firebase Authentication (Email/Password + Google OAuth)
+- Secure JWT-based session handling
+- Backend role validation using Firebase Admin SDK
+- Route protection enforced on both client and server
 
-Framer Motion: For premium UI animations and transitions.
+---
 
-Recharts: For data visualization.
+### Admin Controls
 
-Tailwind CSS: For rapid, responsive styling.
+- Centralized user management (role assignment, deletion)
+- Full course moderation (edit/delete any course)
+- Payment approval workflow for enrollments
+- Newsletter subscriber monitoring with timestamps
 
-Uiverse.io: Used this because it is leveraged for high-quality, community-made CSS and Tailwind components (buttons, loaders, and inputs) to enhance the "eye-soothing" user experience.
+---
 
-Backend:
+### Mentor Features
 
-Node.js & Express: Scalable server-side logic.
+- Create, update, and delete courses
+- Profile management
+- Visibility into enrolled students per course
+- Revenue awareness based on enrollments
 
-MongoDB: NoSQL database for flexible data modeling.
+---
 
-Firebase Admin SDK: For secure user management.
+### Student Experience
 
-CORS: Configured for secure cross-origin resource sharing.
+- Course discovery and browsing
+- Wishlist system (persisted via localStorage)
+- Secure checkout using Stripe
+- Enrollment lifecycle tracking (pending → approved)
+- Access control based on purchase approval status
+
+---
+
+### Payment Workflow
+
+- Stripe integration for secure transactions
+- Server-side payment intent handling
+- Manual admin approval layer before course access is granted
+- Prevents unauthorized content access post-payment
+
+---
+
+### Newsletter System
+
+- Email subscription via EmailJS
+- Automated welcome email delivery
+- Admin dashboard visibility into subscriber data and timestamps
+
+---
+
+## 🏗️ Architecture & Tech Stack
+
+### Frontend
+
+- React 19 (Component-driven architecture)
+- React Router (v7) for dynamic routing
+- TanStack React Query for server-state management
+- Tailwind CSS for utility-first styling
+- Firebase Client SDK for authentication
+- Axios for API communication
+  -Uiverse.io for high-quality, community-made CSS and Tailwind components (buttons, loaders, and inputs) to enhance the "eye-soothing" user experience.
+
+### Backend
+
+- Node.js + Express (RESTful API design)
+- MongoDB (NoSQL data persistence)
+- Firebase Admin SDK (secure token verification)
+- Stripe API (payment processing)
+- Environment-based configuration using dotenv
+
+---
+
+## 🔒 Security Considerations
+
+- Role-based access enforced at API level
+- Firebase ID token verification on protected routes
+- Environment variables for all sensitive credentials
+- CORS configuration to restrict unauthorized origins
+- Payment validation handled server-side
+
+---
+
+## 📦 Key Functional Modules
+
+- Role-Based Dashboards (Admin / Mentor / Student)
+- Course Management System (CRUD + ownership validation)
+- Enrollment & Approval Workflow
+- Payment Integration (Stripe)
+- Wishlist Persistence (Client-side storage)
+- Newsletter Subscription Engine
+- Protected API & Route Layer
