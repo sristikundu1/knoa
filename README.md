@@ -10,7 +10,7 @@ Knoa is a full-stack, production-ready learning management platform designed to 
 
 ---
 
-## 🔐 Admin Access (Demo Only)
+## 🔐 Admin Access
 
 > This access is strictly for demonstration and evaluation purposes.
 
