@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import { AuthContext } from "../../contexts/AuthContext";
 import Swal from "sweetalert2";
-import { FaChalkboardTeacher } from "react-icons/fa";
+import { FaChalkboardTeacher, FaPlay } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../Loading/Loading";
 import { HiOutlineCheckCircle } from "react-icons/hi";
@@ -22,6 +22,7 @@ const CourseDetails = () => {
   const { user } = use(AuthContext);
   const { id } = useParams();
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // fetch data from backend
   const { data, isLoading } = useQuery({
@@ -69,6 +70,14 @@ const CourseDetails = () => {
       enrollmentData,
     );
     window.location.href = res.data.url;
+  };
+
+  // Function to extract YouTube ID or use a fallback
+  const getEmbedUrl = (url) => {
+    if (!url) return "";
+    // Converts watch URL to embed URL
+    const videoId = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
   };
 
   // Animation variants
@@ -187,6 +196,43 @@ const CourseDetails = () => {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm mt-8  flex items-center justify-center overflow-hidden">
+                {!isPlaying ? (
+                  /* THUMBNAIL VIEW with Play Icon */
+                  <div
+                    className="relative group cursor-pointer w-full h-full"
+                    onClick={() => setIsPlaying(true)}
+                  >
+                    <img
+                      src={course.thumbnail}
+                      alt="Course Preview"
+                      className="w-full  object-cover rounded-2xl brightness-90 group-hover:brightness-75 transition-all"
+                    />
+                    {/* Play Icon Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-[#00b4d8] p-5 rounded-full shadow-xl transform group-hover:scale-125 transition-transform duration-300">
+                        <FaPlay className="text-white text-2xl ml-1" />
+                      </div>
+                    </div>
+                    <p className="absolute bottom-4 left-4 text-white font-bold text-lg drop-shadow-md">
+                      Watch video
+                    </p>
+                  </div>
+                ) : (
+                  /* VIDEO PLAYER VIEW */
+                  <div className="w-full h-full aspect-video">
+                    <iframe
+                      className="w-full h-full  rounded-2xl"
+                      src={getEmbedUrl("https://youtu.be/SqcY0GlETPk")}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                )}
               </div>
 
               {/* Other Courses - Now inside the sidebar stack */}
