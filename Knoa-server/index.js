@@ -2,13 +2,14 @@ require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 const app = express();
 
 const stripe = require("stripe")(process.env.STRIPE_SECRETE);
 const port = process.env.PORT || 3000;
 
 const admin = require("firebase-admin");
+const { systemPrompt } = require("./aiContext");
 
 // const serviceAccount = require("./knoa-firebase-adminsdk.json");
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString(
@@ -22,7 +23,9 @@ admin.initializeApp({
 
 app.use(cors());
 app.use(express.json());
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
 const verifyFBToken = async (req, res, next) => {
   const token = req.headers.authorization;
@@ -567,25 +570,38 @@ async function run() {
 
     // AI chat
     app.post("/chat", async (req, res) => {
-      const { message } = req.body;
+      const { message, history } = req.body;
 
       try {
-        // Choose the model (gemini-1.5-flash is fast and free)
-        const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-flash",
-          systemInstruction:
-            "You are a helpful assistant for an online learning platform. Keep responses concise.",
+        console.log("--- New Chat Request ---");
+        console.log("Message:", message);
+
+        // 👉 Build full prompt (system + history + user)
+        const fullPrompt = `
+${systemPrompt}
+
+Previous conversation:
+${history?.map((h) => `${h.role}: ${h.text}`).join("\n") || ""}
+
+User: ${message}
+    `;
+
+        // 👉 Correct way to call AI
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: fullPrompt,
         });
 
-        const result = await model.generateContent(message);
-        const response = await result.response;
-        const text = response.text();
-
-        console.log("Gemini says:", text);
-        res.send({ reply: text }); // This matches your frontend 'data.reply'
+        res.json({
+          reply: response.text,
+        });
       } catch (error) {
-        console.error("Gemini Error:", error);
-        res.status(500).send({ error: "Gemini failed to respond" });
+        console.error("Chat Error:", error);
+
+        res.json({
+          reply:
+            "I'm currently perfecting my knowledge! 🧠 Try again in a second.",
+        });
       }
     });
 
