@@ -182,6 +182,7 @@ const StyledWrapper = styled.div`
     width: 100%;
     background: white;
     border: none;
+    color: #1089d3;
     padding: 15px 20px;
     border-radius: 20px;
     margin-top: 15px;

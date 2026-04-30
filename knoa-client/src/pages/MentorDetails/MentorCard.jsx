@@ -29,6 +29,7 @@ const MentorCard = ({ mentor }) => {
     certCount,
     experience,
     studentsCount,
+    averageRating = 1,
   } = mentor;
 
   return (
@@ -129,6 +130,17 @@ const MentorCard = ({ mentor }) => {
                     <FaGithub size={18} />
                   </a>
                 )}
+              </div>
+              <div className="h-4 w-[1px] bg-slate-200"></div>
+              {/* DISPLAY RATING  */}
+              <div className="flex items-center gap-3 ">
+                <div className="flex text-yellow-400 text-xl">
+                  {"★".repeat(Math.round(mentor?.averageRating || 1))}
+                  {"☆".repeat(5 - Math.round(mentor?.averageRating || 1))}
+                </div>
+                <span className="text-sm text-slate-400 font-medium">
+                  {(mentor?.averageRating || 1).toFixed(1)}
+                </span>
               </div>
             </div>
           </div>

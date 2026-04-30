@@ -7,7 +7,7 @@ const HomeLayout = () => {
   return (
     <div className="font-inter flex flex-col min-h-screen">
       {/* HEADER: Full width background */}
-      <header className="w-full bg-base-100  sticky top-0 z-[100]">
+      <header className="w-full bg-base-100  sticky top-0 z-[100] bg-white">
         <div className="max-w-9/12 mx-auto px-4">
           <Navbar />
         </div>

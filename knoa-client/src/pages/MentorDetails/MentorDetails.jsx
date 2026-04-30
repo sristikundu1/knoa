@@ -1,16 +1,62 @@
-import React from "react";
-import { Link, useLoaderData, useParams } from "react-router";
+import React, { useState } from "react";
+import { Link, useLoaderData, useNavigate, useParams } from "react-router";
 import MentorBanner from "./MentorBanner";
 import MentorCard from "./MentorCard";
 import RelatedMentors from "./Relatedmentors";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Loading from "../Loading/Loading";
 import useAxios from "../../hooks/useAxios";
+import useRole from "../../hooks/useRole";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { Rating } from "react-simple-star-rating";
+import Swal from "sweetalert2";
 
 const MentorDetails = () => {
   const axiosPublic = useAxios();
+  const axiosSecure = useAxiosSecure();
+  const { role, roleLoading } = useRole();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [userRating, setUserRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { id } = useParams();
+  const mutation = useMutation({
+    mutationFn: async (rating) => {
+      return await axiosSecure.patch(`/mentors/${id}/rate`, { rating });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["mentor-details", id],
+      });
+      console.log("Rating success");
+
+      Swal.fire({
+        icon: "success",
+        title: "Rating submitted!",
+        text: "Thanks for your feedback 🎉",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    },
+  });
+
+  const handleRating = async (newRating) => {
+    if (roleLoading || isSubmitting) return;
+    if (role !== "student") {
+      navigate("/auth/login");
+      return;
+    }
+
+    setUserRating(newRating);
+    setIsSubmitting(true);
+
+    try {
+      await mutation.mutateAsync(newRating);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["mentor-details", id],
@@ -25,6 +71,7 @@ const MentorDetails = () => {
 
   // Destructure for easy use in your JSX
   const { mentor, courses, relatedMentors } = data;
+  const displayRating = userRating || mentor?.averageRating || 1;
   return (
     <div className="bg-[#FDFEFF] min-h-screen pb-20">
       <MentorBanner />
@@ -98,6 +145,38 @@ const MentorDetails = () => {
                 No active courses found for this mentor.
               </p>
             </div>
+          )}
+        </section>
+
+        {/*  USER RATING SECTION */}
+        <section className="mt-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 ">
+          <h3 className="text-xl font-bold text-[#03045e] mb-2">
+            Rate this Mentor
+          </h3>
+
+          <div className="flex flex-row items-center gap-4 ">
+            <Rating
+              onClick={handleRating}
+              initialValue={displayRating}
+              size={30}
+              fillColor="#facc15"
+              emptyColor="#e5e7eb"
+              allowFraction={true}
+              readonly={roleLoading || role !== "student" || isSubmitting}
+              className="flex items-center"
+              SVGclassName="inline-block"
+            />
+
+            <span className="text-sm text-slate-400">
+              {mentor?.averageRating?.toFixed(1) || 1} (
+              {mentor?.totalRatings || 0} ratings)
+            </span>
+          </div>
+
+          {!(role === "student") && (
+            <p className="text-xs text-red-400 mt-2">
+              Please login to give a rating
+            </p>
           )}
         </section>
 

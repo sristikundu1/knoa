@@ -320,6 +320,44 @@ async function run() {
       },
     );
 
+    app.patch("/mentors/:id/rate", verifyFBToken, async (req, res) => {
+      const { id } = req.params;
+      const { rating } = req.body;
+      if (rating < 0 || rating > 5) {
+        return res.status(400).send({ message: "Invalid rating" });
+      }
+
+      const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
+
+      if (!mentor) {
+        return res.status(404).send({ message: "Mentor not found" });
+      }
+
+      const currentSum = mentor.ratingSum || 0;
+      const currentTotal = mentor.totalRatings || 0;
+
+      const newSum = currentSum + Number(rating);
+      const newTotal = currentTotal + 1;
+
+      const newAverage = newSum / newTotal;
+      await mentorCollection.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            ratingSum: newSum,
+            totalRatings: newTotal,
+            averageRating: parseFloat(newAverage.toFixed(2)),
+          },
+        },
+      );
+
+      res.send({
+        success: true,
+        averageRating: newAverage,
+        totalRatings: newTotal,
+      });
+    });
+
     // dashboard API
 
     // enrollCourse API

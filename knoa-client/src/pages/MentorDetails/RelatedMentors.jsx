@@ -70,9 +70,8 @@ const RelatedMentors = ({ mentor: relatedMentors }) => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth="2"
-                        d="Arrow-Right-Icon-Code-Here-Or-Icon-Component"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
                       />
-                      <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </Link>
                 </div>
